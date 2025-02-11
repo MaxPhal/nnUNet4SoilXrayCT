@@ -1,6 +1,8 @@
 # Deep learning segmentation of soil constituents in 3D X-ray CT images
 
-This repository contains the code and documentation to run the complete nnUNet pipeline from processing, training and predicting on 3d X-ray CT images. If you used this repository and associated code for your own work, please cite the following references: 
+This repository contains the code and documentation to run the complete nnUNet pipeline from processing, training and inference on 3d X-ray CT images. 
+
+If you used this repository and associated code for your own work, please cite the following references: 
 
 Isensee, F., Jaeger, P. F., Kohl, S. A., Petersen, J., & Maier-Hein, K. H. (2021). nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation. Nature methods, 18(2), 203-211. [doi](https://doi.org/10.1038/s41592-020-01008-z)
 
