@@ -324,7 +324,6 @@ sacct
 ````
 To see all available commands related to job monitoring, consult the following [link](https://wiki.ufz.de/eve/index.php/Job_Monitoring_SLURM).Additionnaly, you can track the GPU activity over time with [Grafana](https://grafana.web-intern.app.ufz.de) dashboard.
 
-
 # Comments
 - **Annotation Process:** For annotation we used the following protocol which works well and we recommend to stay with it for future datasets:
   - The value 0 in the annotations means not labeled
@@ -341,10 +340,9 @@ If you want to reduce the runtime, there are different ways to archive this, but
 Again, just let us know if you want same changes here.
 
 # Acknowledgements
+This repository was developed in the framework of a collaboration between the Department of Soil System Sciences of the [Helmholtz Center for Environmental Research](https://www.ufz.de/) and the Applied Computer Vision Lab of [Helmholtz Imaging](https://www.helmholtz-imaging.de/). Part of this work was funded by Helmholtz Imaging (HI), a platform of the Helmholtz Incubator. 
 
 <p align="left">
   <img src="Logos/HI_Logo.png" width="150"> &nbsp;&nbsp;&nbsp;&nbsp;
   <img src="Logos/DKFZ_Logo.png" width="500"> 
 </p>
-
-This repository is developed and maintained by the Applied Computer Vision Lab (ACVL) of [Helmholtz Imaging](https://www.helmholtz-imaging.de/).
