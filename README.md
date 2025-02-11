@@ -1,4 +1,4 @@
-# Deep learning segmentation of soil constituents in 3D X-ray CT images on high performing computer clusters
+# Deep learning segmentation of soil constituents in 3D X-ray CT images on high performance computing clusters
 
 This repository contains the code and documentation to run the complete nnUNet pipeline from processing, training and inference on 3d X-ray CT images. 
 
