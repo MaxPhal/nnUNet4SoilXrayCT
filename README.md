@@ -4,13 +4,13 @@ This repository contains the code and documentation to run the complete nnUNet p
 
 If you used this repository and associated code for your own work, please cite the following references: 
 ````
-Isensee, F., Jaeger, P. F., Kohl, S. A., Petersen, J., & Maier-Hein, K. H. (2021). nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation. Nature methods, 18(2), 203-211. [doi](https://doi.org/10.1038/s41592-020-01008-z)
+Isensee, F., Jaeger, P. F., Kohl, S. A., Petersen, J., & Maier-Hein, K. H. (2021). nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation. Nature methods, 18(2), 203-211. https://doi.org/10.1038/s41592-020-01008-z
 
 ````
+````
+Phalempin, M., Krämer, L., Geers-Lucas, M., Isensee, F., & Schlüter, S. (2024). Advanced segmentation of soil constituents in X-ray CT images using nnUNet. Authorea Preprints. https://doi.org/10.22541/essoar.173395846.68597189/v1
+````
 
-````
-Phalempin, M., Krämer, L., Geers-Lucas, M., Isensee, F., & Schlüter, S. (2024). Advanced segmentation of soil constituents in X-ray CT images using nnUNet. Authorea Preprints. [doi](https://doi.org/10.22541/essoar.173395846.68597189/v1)
-````
 Authors: Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HIP)
 
 **Nomenclature**: The following terms are frequently used in this documentation. 
@@ -53,41 +53,30 @@ git clone https://github.com/MIC-DKFZ/nnUNet.git
 cd nnUNet
 pip3 install -e .
 ````
+More information on nnUNet can be found [here](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/installation_instructions.md#installation-instructions). After installing nnUNet, make sure to set your environmental variables. 
 
-# 1. Image annotation
+````
+set nnUNet_raw=F:\phalempin\nnUNet_raw
+set nnUNet_preprocessed=F:\phalempin\nnUNet_preprocessed
+set nnUNet_results=F:\phalempin\nnUNet_results
+````
 
-
-
-# 2. Installation
-
-We first need to install ImageJ and nnUNet. Afterwards, some files have to be copied from this repository to ImageJ and nnUNet.
-
-## 2.1. ImageJ
-
+## 1.6. Download imageJ and the NIfTI-Analyze plugin
 1. Download ImageJ (Fiji) from [here](https://imagej.net/software/fiji/downloads#other-downloads).
 2. Download the NIfTI-Analyze plugin [here](https://imagej.nih.gov/ij/plugins/nifti.html) and place nifti_io.jar into the plugins folder (for me it was: /home/l727r/Desktop/fiji-linux64/Fiji.app/plugins).
 
-## 2.2. nnUNet
-To run nnUNet, python and git have to be installed.
-Install nnUNet as described [here](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/installation_instructions.md#installation-instructions).
-A short summary:
-1. Install PyTorch
-2. Install nnUNet: We need nnUNet as a framework, this means in step 2 of the instructions we have to follow the second option:
-````
-git clone https://github.com/MIC-DKFZ/nnUNet.git
-cd nnUNet
-pip install -e .
-````
-3. Set the environment variables for nnUNet_raw, nnUNet_preprocessed and nnUNet_results.
-
-## 2.3. This repository
-All packages which are needed to run the code of this repository should already be installed by nnUNet. 
-We have to add two macros into ImageJ and adding one script into nnUNet
-
-1. Put the two .ijm (**For Windows**: convert_mha_to_img.ijm,convert_nii_to_mha.ijm. **For Ubuntu**: (convert_mha_to_img_ubuntu.ijm,convert_nii_to_mha_ubuntu.ijm)) scripts from the Fiji_macros/ folder into the macros folder in the Fiji app (for me it was: /home/l727r/Desktop/fiji-linux64/Fiji.app/macros).
-If the Ubuntu scripts are used, remove the _ubuntu postfix in the filenames.
+## 1.7. Download the files from this repository and place them in their appropriate folders
+1. Put the imageJ macros (files ending with .ijm) into the macros folder in the Fiji app.  
+   **For Windows**: The files are convert_mha_to_img.ijm, convert_nii_to_mha.ijm and convert_tif_to_mha.ijm 
+   **For Ubuntu**: convert_mha_to_img_ubuntu.ijm, convert_nii_to_mha_ubuntu.ijm (for me it was: /home/phalempi/Desktop/fiji-linux64/Fiji.app/macros)
+    If the Ubuntu scripts are used, remove the _ubuntu sufices in the filenames.
 2. Put the nnUNetTrainer_betterIgnoreSampling.py into nnunet/nnunetv2/training/nnUNetTrainer/variants/sampling/
-3. In this repository, adopt \_\_path__.py: You have to define the path to your ImageJ application as well as the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation).
+
+## 1.7.Setting file paths
+In this repository, adopt \_\_path__.py: You have to define the path to your ImageJ application as well as the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation).
+
+# 2. Image annotation
+
 
 # 2. How to run
 
