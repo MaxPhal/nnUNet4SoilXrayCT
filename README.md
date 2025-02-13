@@ -21,6 +21,39 @@ Feel free to add more if some other terms are misleading.
 - Annotation: one single (.mha or .nii.gz) file which contains the class ids - Created by you
 - Prediction: one single (.mha or .nii.gz) file which contains the class ids - Created by the model 
 
+# 1. Setting up your computer 
+When working with Python, we often rely on various plugins and software libraries that need to be well-organized. One effective way to manage them is by using Conda environments. A Conda environment functions like a virtual workspace or isolated system, accessible through the terminal. Software installed within one Conda environment remains separate and may not be available in others. If an environment becomes unstable—for instance, due to incompatible software—you can simply create a new one and start fresh.
+
+## 1.1. Install Miniforge 
+First download and install mamba/conda. We recommend the distribution Miniforge. The installers compatible with your OS can be found [here]{https://github.com/conda-forge/miniforge#miniforge3}. 
+For ease-of-use, it is recommended to install it for your use only and to add Conda to the PATH variable during installation.
+
+## 1.2. Install devbio-napari
+Then install devbio-napari, a distribution of Napari with a set of plugins for bioimage analysis. Please use the following command in your Miniforge terminal
+
+````
+mamba create --name virtual-env python=3.11 devbio-napari pyqt -c conda-forge
+````
+Replace "virtual-env" by any name if you want to give to your virtual environment. Choose a name that is meaningful and easy to remember as you are likely to be using it often.  Make sure to activate your virtual environment before proceeding with further installations. In the rest of this document, we will assume that you named your virtual environment "virtual-env". 
+
+````
+mamba activate virtual-env
+````
+
+## 1.4. Install PyTorch
+
+````
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
+````
+
+## 1.5. Install nnUNet
+
+````
+git clone https://github.com/MIC-DKFZ/nnUNet.git
+cd nnUNet
+pip3 install -e .
+````
+
 # 1. Image annotation
 
 
@@ -210,7 +243,7 @@ Copy then the following lines of codes within the shell file
 #!/bin/bash
 
 #SBATCH --job-name=nnunet_tr_fold0  # jobname
-#SBATCH --chdir=/work/username      # sets the working directory
+#SBATCH --chdir=/work/username      # sets the working directory 
 #SBATCH --output=/work/%u/%x-%j.log # give name and filepath for the .log file (console output)
 #SBATCH --time=1080                 # time requested for the job (in minutes)
 #SBATCH --nodes=1                   # number of nodes requested
