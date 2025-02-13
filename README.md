@@ -236,46 +236,12 @@ You can repeat the operations and create several shell scripts (i.e. one for eac
 Please consider the following when requesting resources on the EVE cluster. One of the most important resource at EVE is the maximum runtime of jobs. It specifies a limit which a running job may not exceed. If the job exceeds the requested time, it will be killed automatically by the scheduler. The same applies for the requested memory per cpu. It is a good practice to optimize these parameters to avoid exceeding the job requirements, but to keep them as low as possible so that the scheduler grants resources quicker. Note also that GPU Nodes only have a maximum of 470GB RAM available. This means that the total amount of RAM (calculated as cpus-per-task * mem-per-cpu) has to be inferior to 470GB. 
 
 ## 3.7. Preparing of array jobs for the predictions
-In order to run the predictions in a parallelized fashion on the EVE cluster, each image has to be placed in its specific folder. The reason is that nnUNet functions in a folder based manner, i.e., it predicts all the images present in given folder. However, if all the images to be predicted were in the same folder, the memory and time requirements would be huge, and the scheduler would not allocate resouces to the job. By putting one image in a single folder, the memory and time requirements are low and the images can be distributed across all nodes of the cluster and on the GPUs. First, drag the preprocessed grayscale data to be predicted in a folder called "images_nii" in a folder at "/work/phalempi/grayscale_data/", for instance. Then create a shell script (called for instance mkdir_movefile.sh) containing the following command
+In order to run the predictions in a parallelized fashion on the EVE cluster, each image has to be placed in its specific folder. The reason is that nnUNet functions in a folder based manner, i.e., it predicts all the images present in given folder. However, if all the images to be predicted were in the same folder, the memory and time requirements would be huge, and the scheduler would not allocate resouces to the job. By putting one image in a single folder, the memory and time requirements are low and the images can be distributed across all nodes hosting GPUs. To spare you the effort of moving each image into an individual folders, we have created a shell script that does the job for you. The shell script takes two arguments: (1) the input folder containing the images to be predicted and (2) the directory path where the folders will each individual folders will be created. Those arguments are given after the flags -i and -o, respectively. You can then run the shell script with the following command. 
 
 ````shell
-#!/bin/bash
-
-# Define the folder path
-folder_path="/work/phalempi/grayscale_data/images_nii"
-
-# Initialize an empty list
-file_list=()
-
-# Loop through all files in the folder and add them to the list
-for file in "$folder_path"/*; do
-    # Check if it's a file (not a directory)
-    if [ -f "$file" ]; then
-        file_list+=("$(basename "$file")")
-    fi
-done
-
-# Loop through the list of file names and create a folder for each
-folder_path_out="/work/phalempi/grayscale_data"
-
-for file_name in "${file_list[@]}"; do
-    # Define the new folder path
-    new_folder="$folder_path_out/${file_name}"
-    # Create the new folder
-    mkdir -p "$new_folder"
-    echo "Created folder: $new_folder"
-
-    # Move the file into the new folder
-    mv "$folder_path/$file_name" "$new_folder/"
-    echo "Moved file: $file_name to $new_folder"
-done
+sh mkdir_movefiles.sh -i /path/to/input/images -o /path/to/output/images
 ````
-You can then run the shell script with the following command. Note that here, we do not need to submit the job to the scheduler but can simply run it with a "sh" command
-
-````shell
-sh mkdir_movefiles.sh 
-````
-With this script, all images are now placed into a single individual folder and are ready to be processed.
+Note that if "/path/to/output/image" does not exist, it will be created automatically. Note also that here, we do not need to submit the job to the scheduler but can simply run it with a "sh" command. After running this shell script, all images are now placed into a single individual folder and are ready to be processed.
 
 ## 3.8. Running predictions with an array job
 In order to run the predictions in a parallelized manner, we have to create a so-called "array job". Job arrays allow to use SLURM's ability to create multiple jobs from one script. For example, instead of having 5 submission scripts to run the same job step with different arguments, we can have one script to run the 5 job steps at once. This allows to leverage EVE´s ability to process images simulateneously (x GPUs process x images at the same time). To do so, prepare a shell script (named for instance submit_nnUnet_array_list.sh) and copy the following commands in it.
