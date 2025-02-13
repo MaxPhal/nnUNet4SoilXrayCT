@@ -25,11 +25,11 @@ Feel free to add more if some other terms are misleading.
 When working with Python, we often rely on various plugins and software libraries that need to be well-organized. One effective way to manage them is by using Conda environments. A Conda environment functions like a virtual workspace or isolated system, accessible through the terminal. Software installed within one Conda environment remains separate and may not be available in others. If an environment becomes unstable—for instance, due to incompatible software—you can simply create a new one and start fresh.
 
 ## 1.1. Install Miniforge 
-First download and install mamba/conda. We recommend the distribution Miniforge. The installers compatible with your OS can be found [here]{https://github.com/conda-forge/miniforge#miniforge3}. 
+First download and install mamba/conda. We recommend the distribution Miniforge. The installers compatible with your OS can be found [here](https://github.com/conda-forge/miniforge#miniforge3). 
 For ease-of-use, it is recommended to install it for your use only and to add Conda to the PATH variable during installation.
 
 ## 1.2. Install devbio-napari
-Then install devbio-napari, a distribution of Napari with a set of plugins for bioimage analysis. Please use the following command in your Miniforge terminal
+Then install devbio-napari, a distribution of [Napari](https://github.com/haesleinhuepf/devbio-napari) with a set of plugins for bioimage analysis. Please use the following command in your Miniforge terminal
 
 ````
 mamba create --name virtual-env python=3.11 devbio-napari pyqt -c conda-forge
