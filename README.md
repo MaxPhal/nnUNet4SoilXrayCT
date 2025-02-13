@@ -60,7 +60,7 @@ set nnUNet_preprocessed=F:\phalempin\nnUNet_preprocessed
 set nnUNet_results=F:\phalempin\nnUNet_results
 ````
 
-## 1.6. Download imageJ and the NIfTI-Analyze plugin
+## 1.6. Download imageJ
 
 Download ImageJ (Fiji) from [here](https://imagej.net/software/fiji/downloads#other-downloads).
 
