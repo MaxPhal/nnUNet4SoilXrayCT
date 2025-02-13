@@ -21,17 +21,20 @@ Feel free to add more if some other terms are misleading.
 - Annotation: one single (.mha or .nii.gz) file which contains the class ids - Created by you
 - Prediction: one single (.mha or .nii.gz) file which contains the class ids - Created by the model 
 
+# 1. Image annotation
 
-# 1. Installation
+
+
+# 2. Installation
 
 We first need to install ImageJ and nnUNet. Afterwards, some files have to be copied from this repository to ImageJ and nnUNet.
 
-## 1.1. ImageJ
+## 2.1. ImageJ
 
 1. Download ImageJ (Fiji) from [here](https://imagej.net/software/fiji/downloads#other-downloads).
 2. Download the NIfTI-Analyze plugin [here](https://imagej.nih.gov/ij/plugins/nifti.html) and place nifti_io.jar into the plugins folder (for me it was: /home/l727r/Desktop/fiji-linux64/Fiji.app/plugins).
 
-## 1.2. nnUNet
+## 2.2. nnUNet
 To run nnUNet, python and git have to be installed.
 Install nnUNet as described [here](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/installation_instructions.md#installation-instructions).
 A short summary:
@@ -44,7 +47,7 @@ pip install -e .
 ````
 3. Set the environment variables for nnUNet_raw, nnUNet_preprocessed and nnUNet_results.
 
-## 1.3. This repository
+## 2.3. This repository
 All packages which are needed to run the code of this repository should already be installed by nnUNet. 
 We have to add two macros into ImageJ and adding one script into nnUNet
 
