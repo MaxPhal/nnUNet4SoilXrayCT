@@ -67,8 +67,8 @@ set nnUNet_results=F:\phalempin\nnUNet_results
 
 ## 1.7. Download the files from this repository and place them in their appropriate folders
 1. Put the imageJ macros (files ending with .ijm) into the macros folder in the Fiji app.  
-   **For Windows**: The files are convert_mha_to_img.ijm, convert_nii_to_mha.ijm and convert_tif_to_mha.ijm 
-   **For Ubuntu**: convert_mha_to_img_ubuntu.ijm, convert_nii_to_mha_ubuntu.ijm (for me it was: /home/phalempi/Desktop/fiji-linux64/Fiji.app/macros)
+   **For Windows**: The files are convert_mha_to_img.ijm, convert_nii_to_mha.ijm and convert_tif_to_mha.ijm.
+   **For Ubuntu**: convert_mha_to_img_ubuntu.ijm, convert_nii_to_mha_ubuntu.ijm (for me it was: /home/phalempi/Desktop/fiji-linux64/Fiji.app/macros).
     If the Ubuntu scripts are used, remove the _ubuntu sufices in the filenames.
 2. Put the nnUNetTrainer_betterIgnoreSampling.py into nnunet/nnunetv2/training/nnUNetTrainer/variants/sampling/
 
