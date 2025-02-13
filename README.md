@@ -62,17 +62,18 @@ set nnUNet_results=F:\phalempin\nnUNet_results
 ````
 
 ## 1.6. Download imageJ and the NIfTI-Analyze plugin
-1. Download ImageJ (Fiji) from [here](https://imagej.net/software/fiji/downloads#other-downloads).
-2. Download the NIfTI-Analyze plugin [here](https://imagej.nih.gov/ij/plugins/nifti.html) and place nifti_io.jar into the plugins folder (for me it was: /home/l727r/Desktop/fiji-linux64/Fiji.app/plugins).
+
+Download ImageJ (Fiji) from [here](https://imagej.net/software/fiji/downloads#other-downloads).
 
 ## 1.7. Download the files from this repository and place them in their appropriate folders
-1. Put the imageJ macros (files ending with .ijm) into the macros folder in the Fiji app.  
+1. Put the imageJ macros (files ending with .ijm) into the macros folder in the Fiji app (at .../Fiji.app/macros).
    **For Windows**: The files are convert_mha_to_img.ijm, convert_nii_to_mha.ijm and convert_tif_to_mha.ijm.
    
-   **For Ubuntu**: convert_mha_to_img_ubuntu.ijm, convert_nii_to_mha_ubuntu.ijm (for me it was: /home/phalempi/Desktop/fiji-linux64/Fiji.app/macros).
+   **For Ubuntu**: convert_mha_to_img_ubuntu.ijm, convert_nii_to_mha_ubuntu.ijm.
     If the Ubuntu scripts are used, remove the _ubuntu sufices in the filenames.
-3. Put the nnUNetTrainer_betterIgnoreSampling.py into nnunet/nnunetv2/training/nnUNetTrainer/variants/sampling/
-
+2. Put the nnUNetTrainer_betterIgnoreSampling.py into nnunet/nnunetv2/training/nnUNetTrainer/variants/sampling/
+3. Place nifti_io.jar into the plugins folder of ImageJ (at ../Fiji.app/plugins").
+   
 ## 1.7.Setting file paths
 In this repository, adopt \_\_path__.py: You have to define the path to your ImageJ application as well as the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation).
 
