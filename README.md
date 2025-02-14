@@ -1,6 +1,6 @@
 # Welcome
 
-This repository contains the code and documentation to run the complete nnUNet pipeline from processing, training and inference on 3d X-ray CT images. 
+This repository contains the code and documentation to run the complete nnUNet pipeline from processing, training and inference on 3D X-ray CT images. 
 
 If you used this repository and associated code for your own work, please cite the following references: 
 ````
@@ -17,6 +17,9 @@ Authors: Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HIP)
 
 # Workflow
 
+<p align="center">
+  <img src="Figures/Workflow.png" width="500"> 
+</p>
 
 **Nomenclature**: The following terms are frequently used in this documentation. 
 They might have some slightly different meanings in our communities, this is how I used them in this document.
@@ -31,6 +34,7 @@ When working with Python, we often rely on various plugins and software librarie
 First download and install mamba/conda. We recommend the distribution [Miniforge](https://github.com/conda-forge/miniforge#miniforge3). For ease-of-use, it is recommended to install it for your use only and to add Conda to the PATH variable during installation.
 
 ## 1.2. Install devbio-napari
+napari is an n-dimensional image viewer in Python. It can view NumPy arrays as well as many others in the ecosystem, including Dask, Zarr, and Xarray.
 Then install devbio-napari, a distribution of [Napari](https://github.com/haesleinhuepf/devbio-napari) with a set of plugins for bioimage analysis. Please use the following command in your Miniforge terminal
 
 ````
