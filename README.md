@@ -24,14 +24,16 @@ They might have some slightly different meanings in our different communities, t
 - Prediction: one single (.mha or .nii.gz) file which contains the class ids - Created by nnUNet
   
 # Workflow
-The developed workflow includes several crucial steps such as image annotation, conversion, preprocessing, model training, inference and analysis of the output data (Figure 1). The workflow was mainly developed in a Python environment. It uses several scripts (steps in italic font on figure 1) which create annotations and convert the images to nnUNet-friendly formats, before processing using the native nnUNet pipeline (steps in bold font on figure 1). The presented workflow relies on the use of high performance computing (HPC) cluster to perform the computionnally demanding tasks such as training and inference. We highly recommend you doing the same because GPUs are so much faster than CPUs. Also, we have developed this workflow in a way that several GPUs can work in parallel on several cutouts of the same image. This feature allows increased processing speed, which makes it highly competitive even against less demanding segmentation methods. If your university or research insitutions does not offer access to a HPC cluster for scientific computation, consider relying on dedicated GPU Servers that can be rented. For processing tasks that rely on CPUs only, we recommend using on a regular Workstation. To develop the workflow, we used a workstation running on Windows (64-bit, 767 GB RAM) for CPU only tasks. For GPU tasks only, we used the [EVE cluster](https://www.ufz.de/index.php?en=51499) of the UFZ. 
+The developed workflow includes several crucial steps such as image annotation, conversion, preprocessing, model training, inference and analysis of the output data (Figure 1). The workflow was mainly developed in a Python environment. It uses several scripts (steps in italic font on figure 1) which create annotations and convert the images to nnUNet-friendly formats, before processing using the native nnUNet pipeline (steps in bold font on figure 1). 
 
 <p align="center">
   <img src="Figures/Workflow.png" width="500"> 
 </p>
 
 **Figure 1.** Workflow to transition from 3D X-ray CT image stacks to nnUNet predictions 
-  
+
+The presented workflow relies on the use of high performance computing (HPC) cluster to perform the computionnally demanding tasks such as training and inference. We highly recommend you doing the same because GPUs are so much faster than CPUs. Also, we have developed this workflow in a way that several GPUs can work in parallel on several cutouts of the same image. This feature allows increased processing speed, which makes it highly competitive even against less demanding segmentation methods. If your university or research insitutions does not offer access to a HPC cluster for scientific computation, consider relying on dedicated GPU Servers that can be rented. For processing tasks that rely on CPUs only, we recommend using on a regular Workstation. To develop the workflow, we used a workstation running on Windows (64-bit, 767 GB RAM) for CPU only tasks. For GPU tasks only, we used the [EVE cluster](https://www.ufz.de/index.php?en=51499) of the UFZ. 
+
 # 1. Setting up your computer 
 When working with Python, we often rely on various plugins and software libraries that need to be well-organized. One effective way to manage them is by using Conda environments. A Conda environment functions like a virtual workspace or isolated system, accessible through the terminal. Software installed within one Conda environment remains separate and may not be available in others. If an environment becomes unstable—for instance, due to incompatible software—you can simply create a new one and start fresh.
 
