@@ -8,18 +8,22 @@ Phalempin, M., Krämer, L., Geers-Lucas, M., Isensee, F., & Schlüter, S. (2024)
 ````
 Our contribution is three-fold, i.e., we have developed:  
 1. a new methodology to provide an efficient labeling strategy to obtain ground-truth annotations used as training datasets.
-2. several scripts which allows to prepare the input images to a format that is compatible with nnUNet.
-3. extra utilities which allow to extract relevant results such as Dice scores or the value of the Loss function in a format that can be diretly used for generating figures.  
+2. several scripts which allow to prepare the input images to a format that is compatible with nnUNet.
+3. extra utilities which allow to extract relevant results in a format that can be diretly used for generating figures for scientific papers. These results include data such as Dice scores or the value of the Loss function as a function of the number of epochs during training. 
 
 We hope you will find this repository helpful! We wish a you a lot of fun working with nnUNet :). 
 
 Authors: Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HIP)
 
 # Workflow
+The developed workflow includes several crucial steps such as image annotation, conversion, preprocessing, model training, inference and analysis of the output data (Figure 1). The workflow was mainly developed used python environment. It uses several python scripts which create annotations and convert the images to a nnUNet-friendly format, before the processing using the native nnUNet pipeline. The 
+
 
 <p align="center">
   <img src="Figures/Workflow.png" width="500"> 
 </p>
+
+**Figure 1.**: Workflow to transition from 3D X-ray CT image stacks to nnUNet predictions 
 
 **Nomenclature**: The following terms are frequently used in this documentation. 
 They might have some slightly different meanings in our communities, this is how I used them in this document.
