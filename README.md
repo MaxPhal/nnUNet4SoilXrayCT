@@ -15,22 +15,23 @@ We hope you will find this repository helpful! We wish a you a lot of fun workin
 
 Authors: Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HIP)
 
+# Nomenclature
+The following terms are frequently used in this documentation. 
+They might have some slightly different meanings in our different communities, this is how we used them in this document.
+- Dataset: Collection of all images and annotation
+- Image: one single (.mha or .nii.gz) file which contains the grayscale values
+- Annotation: one single (.mha or .nii.gz) file which contains the class ids - Created by you
+- Prediction: one single (.mha or .nii.gz) file which contains the class ids - Created by nnUNet
+  
 # Workflow
-The developed workflow includes several crucial steps such as image annotation, conversion, preprocessing, model training, inference and analysis of the output data (Figure 1). The workflow was mainly developed used python environment. It uses several python scripts which create annotations and convert the images to a nnUNet-friendly format, before the processing using the native nnUNet pipeline. The 
+The developed workflow includes several crucial steps such as image annotation, conversion, preprocessing, model training, inference and analysis of the output data (Figure 1). The workflow was mainly developed in a python environment. It uses several scripts which create annotations and convert the images to a nnUNet-friendly format, before processing using the native nnUNet pipeline. 
 
 
 <p align="center">
   <img src="Figures/Workflow.png" width="500"> 
 </p>
 
-**Figure 1.**: Workflow to transition from 3D X-ray CT image stacks to nnUNet predictions 
-
-**Nomenclature**: The following terms are frequently used in this documentation. 
-They might have some slightly different meanings in our communities, this is how I used them in this document.
-- Dataset: Collection of all images and annotation
-- Image: one single (.mha or .nii.gz) file which contains the grayscale values
-- Annotation: one single (.mha or .nii.gz) file which contains the class ids - Created by you
-- Prediction: one single (.mha or .nii.gz) file which contains the class ids - Created by nnUNet
+**Figure 1.** Workflow to transition from 3D X-ray CT image stacks to nnUNet predictions 
   
 # 1. Setting up your computer 
 When working with Python, we often rely on various plugins and software libraries that need to be well-organized. One effective way to manage them is by using Conda environments. A Conda environment functions like a virtual workspace or isolated system, accessible through the terminal. Software installed within one Conda environment remains separate and may not be available in others. If an environment becomes unstable—for instance, due to incompatible software—you can simply create a new one and start fresh.
