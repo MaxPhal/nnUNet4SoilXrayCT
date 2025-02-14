@@ -342,6 +342,6 @@ Again, just let us know if you want same changes here.
 This repository was developed in the framework of a collaboration between the Department of Soil System Sciences of the [Helmholtz Center for Environmental Research](https://www.ufz.de/) and the Applied Computer Vision Lab of [Helmholtz Imaging](https://www.helmholtz-imaging.de/). Part of this work was funded by Helmholtz Imaging (HI), a platform of the Helmholtz Incubator. 
 
 <p align="left">
-  <img src="Logos/HI_Logo.png" width="150"> &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="Logos/DKFZ_Logo.png" width="500"> 
+  <img src="Figures/HI_Logo.png" width="150"> &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="Figures/DKFZ_Logo.png" width="500"> 
 </p>
