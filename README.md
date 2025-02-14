@@ -13,7 +13,9 @@ Our contribution is three-fold, i.e., we have developed:
 
 We hope you will find this repository helpful! We wish a you a lot of fun working with nnUNet :). 
 
-Authors: Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HIP)
+Feel free to contact us if you want to share your experience using nnUNet on your X-ray CT images of soil samples.
+
+This repository was drafted by Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HIP). It was reviewed and edited by Steffen Schlüter (UFZ), Maik Geers-Lucas (TUBerlin) and Fabian Isensee (DKFZ, HIP),
 
 # Nomenclature
 The following terms are frequently used in this documentation. 
@@ -41,8 +43,7 @@ When working with Python, we often rely on various plugins and software librarie
 Miniforge is a lightweight version of Anaconda that helps you install and manage Python and other software packages efficiently. It’s designed for flexibility and supports open-source package management with Conda, making it ideal for scientific computing and data analysis. We recommend the distribution [Miniforge](https://github.com/conda-forge/miniforge#miniforge3). For ease-of-use, it is recommended to install it for your use only and to add Conda to the PATH variable during installation.
 
 ## 1.2. Install devbio-napari
-Napari is an open-source tool for viewing and analyzing large 2D and 3D images, commonly used in scientific research. It provides an interactive, user-friendly interface for exploring image data, making annotations, and applying analysis techniques. What we love so much about it is that it is scriptable which makes it really easy to work with. We recommend devbio-napari, a distribution of [Napari](https://github.com/haesleinhuepf/devbio-napari) with a set of plugins for bioimage analysis. Please use the following command in your Miniforge terminal to install devbio-napari.
-
+Napari is an open-source tool for viewing and analyzing large 2D and 3D images, commonly used in scientific research. It provides an interactive, user-friendly interface for exploring image data, making annotations, and applying analysis techniques. What we love so much about Napari is that it is scriptable which makes it really easy to work with. We recommend devbio-napari, a distribution of [Napari](https://github.com/haesleinhuepf/devbio-napari) with a set of plugins for bioimage analysis. In our workflow, we used Napari to perform image annotation. Please use the following command in your Miniforge terminal to install devbio-napari.
 ````
 mamba create --name venv python=3.11 devbio-napari pyqt -c conda-forge
 ````
@@ -58,26 +59,25 @@ PyTorch is an open-source machine learning library for Python, widely used for d
 ````
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
 ````
-Note that, here, we install an older PyTorch version (compatible with the CUDA platform 11.7). More recent versions of CUDA are currently available, however have not tried them.
+Note that, here, we install an older PyTorch version (compatible with the CUDA platform 11.7). More recent versions of CUDA are currently available, however we have not yet tried them.
 
 ## 1.5. Install nnUNet
 nnUNet is a self-configuring deep learning framework for medical image segmentation. It automatically adapts to new datasets by optimizing preprocessing, network architecture, and training settings, making it a powerful and user-friendly tool for segmentation tasks. More information on nnUNet can be found [here](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/installation_instructions.md#installation-instructions). To install nnUNet, enter the following commands: 
-
 ````
 git clone https://github.com/MIC-DKFZ/nnUNet.git
 cd nnUNet
 pip3 install -e .
 ````
- After installing nnUNet, make sure to set your environmental variables. 
-
+After installing nnUNet, create three folders named nnUNet_raw, nnUNet_preprocessed and nnUNet_results. After creating the folders, set them as environmental variables using the following commands in your Miniforge
+terminal: 
 ````
-set nnUNet_raw=F:\phalempin\nnUNet_raw
-set nnUNet_preprocessed=F:\phalempin\nnUNet_preprocessed
-set nnUNet_results=F:\phalempin\nnUNet_results
+set nnUNet_raw= your/path/to/nnUNet_raw
+set nnUNet_preprocessed=your/path/to/nnUNet_preprocessed
+set nnUNet_results=your/path/to/nnUNet_results
 ````
 
-## 1.6. Download imageJ
-Download ImageJ (Fiji) from [here](https://imagej.net/software/fiji/downloads#other-downloads).
+## 1.6. Download ImageJ
+ImageJ is a free, open-source image processing software widely used in scientific research. In our workflow, we used ImageJ to convert the input images to a nnUNet-friendly format. You can download ImageJ (Fiji) from [here](https://imagej.net/software/fiji/downloads#other-downloads).
 
 ## 1.7. Download the files from this repository and place them in appropriate folders
 1. Put the imageJ macros (files ending with .ijm) into the macros folder in the Fiji app (at .../Fiji.app/macros).
@@ -90,7 +90,7 @@ Download ImageJ (Fiji) from [here](https://imagej.net/software/fiji/downloads#ot
 4. Place nifti_io.jar into the plugins folder of ImageJ (at ../Fiji.app/plugins").
    
 ## 1.7.Setting file paths
-In this repository, adopt \_\_path__.py: You have to define the path to your ImageJ application as well as the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation).
+Open the \_\_path__.py (from this repository) file with a Text Editor and adapt the paths according to your local installations. You have to define the path to your ImageJ application as well as the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation).
 
 # 2. Image annotation
 
