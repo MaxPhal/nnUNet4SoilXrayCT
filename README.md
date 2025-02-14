@@ -2,11 +2,14 @@
 This repository contains the code and documentation to run the complete nnUNet pipeline on X-ray CT images of soil samples. It was developed in the framework of a collaboration between the Department of Soil System Sciences of the [Helmholtz Center for Environmental Research](https://www.ufz.de/) and the Applied Computer Vision Lab of [Helmholtz Imaging](https://www.helmholtz-imaging.de/). The main purpose of the collaboration was to promote and ease the adoption of deep learning for image segmentation tasks in soil science, with a focus on 3D X-ray CT images. In that prospect, we provide a detailed explanation on how to transition from a 3D image stack to nnUNet predictions. The repository was written asumming (almost) no prerequisite programming experience from the user. In this way, we hope that it can reach a broader audience. If you used this repository and associated code for your own work, make sure to cite the following references to acknowledge our efforts: 
 ````
 Isensee, F., Jaeger, P. F., Kohl, S. A., Petersen, J., & Maier-Hein, K. H. (2021). nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation. Nature methods, 18(2), 203-211. https://doi.org/10.1038/s41592-020-01008-z
-
 ````
 ````
 Phalempin, M., Krämer, L., Geers-Lucas, M., Isensee, F., & Schlüter, S. (2024). Advanced segmentation of soil constituents in X-ray CT images using nnUNet. Authorea Preprints. https://doi.org/10.22541/essoar.173395846.68597189/v1
 ````
+Our contribution is three-fold, i.e., we have developed:  
+1. a new methodology to provide an efficient labeling strategy to obtain ground-truth annotations used as training datasets.
+2. several scripts which allows to prepare the input images to a format that is compatible with nnUNet.
+3. extra utilities which allow to extract relevant results such as Dice scores or the value of the Loss function in a format that can be diretly used for generating figures.  
 
 We hope you will find this repository helpful! We wish a you a lot of fun working with nnUNet :). 
 
@@ -23,7 +26,8 @@ They might have some slightly different meanings in our communities, this is how
 - Dataset: Collection of all images and annotation
 - Image: one single (.mha or .nii.gz) file which contains the grayscale values
 - Annotation: one single (.mha or .nii.gz) file which contains the class ids - Created by you
-- Prediction: one single (.mha or .nii.gz) file which contains the class ids - Created by the model 
+- Prediction: one single (.mha or .nii.gz) file which contains the class ids - Created by nnUNet
+  
 # 1. Setting up your computer 
 When working with Python, we often rely on various plugins and software libraries that need to be well-organized. One effective way to manage them is by using Conda environments. A Conda environment functions like a virtual workspace or isolated system, accessible through the terminal. Software installed within one Conda environment remains separate and may not be available in others. If an environment becomes unstable—for instance, due to incompatible software—you can simply create a new one and start fresh.
 
