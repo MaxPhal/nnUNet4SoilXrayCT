@@ -24,7 +24,9 @@ They might have some slightly different meanings in our different communities, t
 - Image: one single (.mha or .nii.gz) file which contains the grayscale values
 - Annotation: one single (.mha or .nii.gz) file which contains the class ids - Created by you
 - Prediction: one single (.mha or .nii.gz) file which contains the class ids - Created by nnUNet
-  
+- Class:
+- Label:
+    
 # Workflow
 The developed workflow includes several crucial steps such as image annotation, conversion, preprocessing, model training, inference and analysis of the output data (Figure 1). The workflow was mainly developed in a Python environment. It uses several scripts (steps in italic font on figure 1) which create annotations and convert the images to nnUNet-friendly formats, before processing using the native nnUNet pipeline (steps in bold font on figure 1). 
 
@@ -93,7 +95,7 @@ ImageJ is a free, open-source image processing software widely used in scientifi
 Open the \_\_path__.py file (from this repository) with a Text Editor and adapt the paths according to your local installations. You have to define the path to your ImageJ application as well as the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation).
 
 # 2. Image annotation
-For image annotation, we developed a strategy that minimizes annotation efforts while still ensuring that all relevant classes are captured. This strategy relies on dense annotations of one slice and on sparse annotations for interesting features within a stack (see figure 2 in our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1). To perform the dense annotations, the middle slice of stack was segmented with Otsu thresholding and heavily annotated manually for other interesting features. To do so in a semi-automatic manner, we created the `make_annotations.py` script. Be launching the script your Miniforge terminal, make sure to adapt the lines 60 to 86 according to the classes that you want to segment. Below, we show the class definition that we used for the Dataset 1 (see [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1)
+For image annotation, we developed a strategy that minimizes annotation efforts while still ensuring that all relevant classes are captured. This strategy relies on dense annotations of one slice and on sparse annotations for interesting features within a stack (see figure 2 in our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1). To perform dense annotations, the middle slice of stack was segmented with Otsu thresholding and heavily annotated manually for other interesting features. To do so in a semi-automatic manner, we created the `make_annotations.py` script. Before launching this script your Miniforge terminal, make sure to adapt the lines 60 to 86 according to the classes that you want to segment. Below, we show the class definition that we used for the Dataset 1 (see our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1) for more information).
 
 ````
 label_names = {
@@ -125,11 +127,11 @@ color_dict = {
 ````
 Once the classes are modified, you can launch the `make_annotations.py` script. This script takes three arguments that are passed from the command terminal as such: 
 ````
-python make_annotations.py -i </path/to/the/images/to/annotate> -o </path/to/where/annotations/are/saved> -id <sample_ID>
+python make_annotations.py -i </path/to/the/images/to/annotate> -o </path/to/where/annotations/will_be/saved> -id <sample_ID>
 # Example
 python make_annotations.py -i C:\Users\phalempi\Desktop\scans -o C:\Users\phalempi\Desktop\annotations -id SPP_P21_SPE_UC193
 ````
-IMPORTANT: The input data should a be 3D .tif stack so that the image can be loaded. 
+IMPORTANT: The input image should a be a 3D .tif stack so that the it can be loaded. 
 
 For the annotations, make sure to select slices from as many different images as possible (best case only 1 slice from a single image) and to add some annotations near the annotated slice and label underrepresented or unrepresentative classes. In the annotations, the class id 0 should never be annotated as it is the class "To be predicted". 
 
