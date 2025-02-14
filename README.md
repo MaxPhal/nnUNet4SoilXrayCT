@@ -32,41 +32,43 @@ The developed workflow includes several crucial steps such as image annotation, 
 
 **Figure 1.** Workflow to transition from 3D X-ray CT image stacks to nnUNet predictions 
 
-The presented workflow relies on the use of high performance computing (HPC) cluster to perform the computionnally demanding tasks such as training and inference. We highly recommend you doing the same because GPUs are so much faster than CPUs. Also, we have developed this workflow in a way that several GPUs can work in parallel on several cutouts of the same image. This feature allows increased processing speed, which makes it highly competitive even against less demanding segmentation methods. If your university or research insitutions does not offer access to a HPC cluster for scientific computation, consider relying on dedicated GPU Servers that can be rented. For processing tasks that rely on CPUs only, we recommend using on a regular Workstation. To develop the workflow, we used a workstation running on Windows (64-bit, 767 GB RAM) for CPU only tasks. For GPU tasks only, we used the [EVE cluster](https://www.ufz.de/index.php?en=51499) of the UFZ. 
+Our workflow relies on the use of high performance computing (HPC) cluster to perform the computionnally demanding tasks such as training and inference. We highly recommend you doing the same because GPUs are so much faster than CPUs. Also, we have developed this workflow in a way that several GPUs can work in parallel on several cutouts of the same image. This feature allows increased processing speed, which makes it highly competitive, even against less demanding segmentation methods. If your university or research insitution does not offer access to a HPC cluster for scientific computation, consider relying on dedicated GPU Servers that can be rented. For processing tasks that rely on CPUs only, we recommend using on a regular workstation. To develop the workflow, we used a workstation running on Windows (64-bit, 767 GB RAM) for CPU tasks only. For GPU tasks only, we used the [EVE cluster](https://www.ufz.de/index.php?en=51499) of the UFZ. 
 
 # 1. Setting up your computer 
 When working with Python, we often rely on various plugins and software libraries that need to be well-organized. One effective way to manage them is by using Conda environments. A Conda environment functions like a virtual workspace or isolated system, accessible through the terminal. Software installed within one Conda environment remains separate and may not be available in others. If an environment becomes unstable—for instance, due to incompatible software—you can simply create a new one and start fresh.
 
 ## 1.1. Install Miniforge 
-First download and install mamba/conda. We recommend the distribution [Miniforge](https://github.com/conda-forge/miniforge#miniforge3). For ease-of-use, it is recommended to install it for your use only and to add Conda to the PATH variable during installation.
+Miniforge is a lightweight version of Anaconda that helps you install and manage Python and other software packages efficiently. It’s designed for flexibility and supports open-source package management with Conda, making it ideal for scientific computing and data analysis. We recommend the distribution [Miniforge](https://github.com/conda-forge/miniforge#miniforge3). For ease-of-use, it is recommended to install it for your use only and to add Conda to the PATH variable during installation.
 
 ## 1.2. Install devbio-napari
-napari is an n-dimensional image viewer in Python. It can view NumPy arrays as well as many others in the ecosystem, including Dask, Zarr, and Xarray.
-Then install devbio-napari, a distribution of [Napari](https://github.com/haesleinhuepf/devbio-napari) with a set of plugins for bioimage analysis. Please use the following command in your Miniforge terminal
+Napari is an open-source tool for viewing and analyzing large 2D and 3D images, commonly used in scientific research. It provides an interactive, user-friendly interface for exploring image data, making annotations, and applying analysis techniques. What we love so much about it is that it is scriptable which makes it really easy to work with. We recommend devbio-napari, a distribution of [Napari](https://github.com/haesleinhuepf/devbio-napari) with a set of plugins for bioimage analysis. Please use the following command in your Miniforge terminal to install devbio-napari.
 
 ````
-mamba create --name virtual-env python=3.11 devbio-napari pyqt -c conda-forge
+mamba create --name venv python=3.11 devbio-napari pyqt -c conda-forge
 ````
-Replace "virtual-env" by any name if you want to give to your virtual environment. Choose a name that is meaningful and easy to remember as you are likely to be using it often.  Make sure to activate your virtual environment before proceeding with further installations. In the rest of this document, we will assume that you named your virtual environment "virtual-env". 
+Replace "venv" by any name if you want to give to your virtual environment. Choose a name that is meaningful and easy to remember as you are likely to be using it often.  Make sure to activate your virtual environment before proceeding with further installations. In the rest of this document, we will assume that you named your virtual environment "venv". 
 
+Once the virtual environment is created, activate it with: 
 ````
-mamba activate virtual-env
+mamba activate venv
 ````
 
 ## 1.4. Install PyTorch
-
+PyTorch is an open-source machine learning library for Python, widely used for deep learning and artificial intelligence. It provides flexible tools for building, training, and deploying neural networks, with strong support for GPUs and dynamic computation graphs. To install PyTorch, enter the following command: 
 ````
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
 ````
+Note that, here, we install an older PyTorch version (compatible with the CUDA platform 11.7). More recent versions of CUDA are currently available, however have not tried them.
 
 ## 1.5. Install nnUNet
+nnUNet is a self-configuring deep learning framework for medical image segmentation. It automatically adapts to new datasets by optimizing preprocessing, network architecture, and training settings, making it a powerful and user-friendly tool for segmentation tasks. More information on nnUNet can be found [here](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/installation_instructions.md#installation-instructions). To install nnUNet, enter the following commands: 
 
 ````
 git clone https://github.com/MIC-DKFZ/nnUNet.git
 cd nnUNet
 pip3 install -e .
 ````
-More information on nnUNet can be found [here](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/installation_instructions.md#installation-instructions). After installing nnUNet, make sure to set your environmental variables. 
+ After installing nnUNet, make sure to set your environmental variables. 
 
 ````
 set nnUNet_raw=F:\phalempin\nnUNet_raw
@@ -75,7 +77,6 @@ set nnUNet_results=F:\phalempin\nnUNet_results
 ````
 
 ## 1.6. Download imageJ
-
 Download ImageJ (Fiji) from [here](https://imagej.net/software/fiji/downloads#other-downloads).
 
 ## 1.7. Download the files from this repository and place them in appropriate folders
