@@ -1,8 +1,5 @@
 # Welcome
-
-This repository contains the code and documentation to run the complete nnUNet pipeline from processing, training and inference on 3D X-ray CT images. 
-
-If you used this repository and associated code for your own work, please cite the following references: 
+This repository contains the code and documentation to run the complete nnUNet pipeline on X-ray CT images of soil samples. It was developed in the framework of a collaboration between the Department of Soil System Sciences of the [Helmholtz Center for Environmental Research](https://www.ufz.de/) and the Applied Computer Vision Lab of [Helmholtz Imaging](https://www.helmholtz-imaging.de/). The main purpose of the collaboration was to promote and ease the adpotion of deep learning for image segmentation tasks in soil science, with a focus on 3D X-ray CT images. In that prospect, we provide a detailed explanation on how to transition from a 3D image stack to nnUNet predictions. The repository was written asumming (almost) no prerequisite programming experience from the user. In this way, we hope that it can reach a broader audience. If you used this repository and associated code for your own work, make sure to cite the following references to acknowledge our effort: 
 ````
 Isensee, F., Jaeger, P. F., Kohl, S. A., Petersen, J., & Maier-Hein, K. H. (2021). nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation. Nature methods, 18(2), 203-211. https://doi.org/10.1038/s41592-020-01008-z
 
@@ -11,7 +8,7 @@ Isensee, F., Jaeger, P. F., Kohl, S. A., Petersen, J., & Maier-Hein, K. H. (2021
 Phalempin, M., Krämer, L., Geers-Lucas, M., Isensee, F., & Schlüter, S. (2024). Advanced segmentation of soil constituents in X-ray CT images using nnUNet. Authorea Preprints. https://doi.org/10.22541/essoar.173395846.68597189/v1
 ````
 
-
+We hope you will find this repository helpful! We wish a you a lot of fun working with nnUNet :). 
 
 Authors: Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HIP)
 
@@ -88,7 +85,7 @@ In this repository, adopt \_\_path__.py: You have to define the path to your Ima
 
 
 # 2. How to run
-
+The input data: 
 You have to keep in mind that nnUNet (as well as the scripts here) are folder based. 
 This means that all images should be in one folder as well as all annotations should be in one folder.
 Also for predicting, all images which should be predicted have to be in one folder and the predictions will be saved into another folder.
@@ -343,7 +340,7 @@ If you want to reduce the runtime, there are different ways to archive this, but
 Again, just let us know if you want same changes here.
 
 # Acknowledgements
-This repository was developed in the framework of a collaboration between the Department of Soil System Sciences of the [Helmholtz Center for Environmental Research](https://www.ufz.de/) and the Applied Computer Vision Lab of [Helmholtz Imaging](https://www.helmholtz-imaging.de/). Part of this work was funded by Helmholtz Imaging (HI), a platform of the Helmholtz Incubator. 
+Part of this work was funded by Helmholtz Imaging (HI), a platform of the Helmholtz Incubator. 
 
 <p align="left">
   <img src="Figures/UFZ_Logo.png" width="500"> 
