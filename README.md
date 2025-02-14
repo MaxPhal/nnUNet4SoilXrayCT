@@ -1,4 +1,4 @@
-# Deep learning segmentation of soil constituents in 3D X-ray CT images on high performance computing clusters
+# Welcome
 
 This repository contains the code and documentation to run the complete nnUNet pipeline from processing, training and inference on 3d X-ray CT images. 
 
@@ -11,16 +11,19 @@ Isensee, F., Jaeger, P. F., Kohl, S. A., Petersen, J., & Maier-Hein, K. H. (2021
 Phalempin, M., Krämer, L., Geers-Lucas, M., Isensee, F., & Schlüter, S. (2024). Advanced segmentation of soil constituents in X-ray CT images using nnUNet. Authorea Preprints. https://doi.org/10.22541/essoar.173395846.68597189/v1
 ````
 
+
+
 Authors: Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HIP)
+
+# Workflow
+
 
 **Nomenclature**: The following terms are frequently used in this documentation. 
 They might have some slightly different meanings in our communities, this is how I used them in this document.
-Feel free to add more if some other terms are misleading. 
 - Dataset: Collection of all images and annotation
 - Image: one single (.mha or .nii.gz) file which contains the grayscale values
 - Annotation: one single (.mha or .nii.gz) file which contains the class ids - Created by you
 - Prediction: one single (.mha or .nii.gz) file which contains the class ids - Created by the model 
-
 # 1. Setting up your computer 
 When working with Python, we often rely on various plugins and software libraries that need to be well-organized. One effective way to manage them is by using Conda environments. A Conda environment functions like a virtual workspace or isolated system, accessible through the terminal. Software installed within one Conda environment remains separate and may not be available in others. If an environment becomes unstable—for instance, due to incompatible software—you can simply create a new one and start fresh.
 
