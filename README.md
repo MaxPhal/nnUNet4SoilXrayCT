@@ -71,7 +71,7 @@ set nnUNet_results=F:\phalempin\nnUNet_results
 
 Download ImageJ (Fiji) from [here](https://imagej.net/software/fiji/downloads#other-downloads).
 
-## 1.7. Download the files from this repository and place them in their appropriate folders
+## 1.7. Download the files from this repository and place them in appropriate folders
 1. Put the imageJ macros (files ending with .ijm) into the macros folder in the Fiji app (at .../Fiji.app/macros).
    
    **For Windows**: The files are convert_mha_to_img.ijm, convert_nii_to_mha.ijm and convert_tif_to_mha.ijm.
