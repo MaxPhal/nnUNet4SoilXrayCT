@@ -90,10 +90,48 @@ ImageJ is a free, open-source image processing software widely used in scientifi
 4. Place nifti_io.jar into the plugins folder of ImageJ (at ../Fiji.app/plugins").
    
 ## 1.7.Setting file paths
-Open the \_\_path__.py (from this repository) file with a Text Editor and adapt the paths according to your local installations. You have to define the path to your ImageJ application as well as the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation).
+Open the \_\_path__.py file (from this repository) with a Text Editor and adapt the paths according to your local installations. You have to define the path to your ImageJ application as well as the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation).
 
 # 2. Image annotation
+For image annotation, we developed a strategy that minimizes annotation efforts while still ensuring that all relevant classes are captured. This strategy relies on dense annotations of one slice and on sparse annotations for interesting features within a stack (see figure 2 in our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1). To perform the dense annotations, the middle slice of stack was segmented with Otsu thresholding and heavily annotated manually for other interesting features. To do so in a semi-automatic manner, we created the `make_annotations.py` script. Be launching the script your Miniforge terminal, make sure to adapt the lines 60 to 86 according to the classes that you want to segment. Below, we show the class definition that we used for the Dataset 1 (see [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1)
 
+````
+label_names = {
+    0: "ToPredict",
+    1: "Matrix",
+    2: "Wall",
+    3: "Rocks",
+    4: "FreshRoots",
+    5: "DegradingRoots",
+    6: "otherPOM",
+    7: "RootChannels",
+    8: "EarthwormBurrows",
+    9: "otherPores",
+}
+
+# Define a colormap for labels
+color_dict = {
+    0: (  0,  0,   0),  # ToPredict
+    1: (115,  0, 102),  # Matrix
+    2: ( 51, 51,  51),  # Wall
+    3: (255,255,   0),  # Rocks
+    4: (204,  0,   0),  # FreshRoots
+    5: (255,153,  51),  # DegradingRoots
+    6: (204,255, 255),  # otherPOM
+    7: ( 11,  0, 255),  # RootChannels
+    8: ( 51,204,   0),  # EarthwormBurrows
+    9: (  0,122, 153),  # otherPores
+}
+````
+Once the classes are modified, you can launch the make_annotations.py script. This script takes three arguments that are passed from the command terminal as such: 
+````
+python make_annotations.py -i </path/to/the/images/to/annotate> -o </path/to/where/annotations/are/saved> -id <sample_ID>
+# Example
+python make_annotations.py -i C:\Users\phalempi\Desktop\scans -o C:\Users\phalempi\Desktop\annotations -id SPP_P21_SPE_UC193
+````
+IMPORTANT: The input data should a be 3D .tif stack so that the image can be loaded. 
+
+For the annotations, make sure to select slices from as many different images as possible (best case only 1 slice from a single image) and to add some annotations near the annotated slice and label underrepresented or unrepresentative classes. In the annotations, the class id 0 should never be annotated as it is the class "To be predicted". 
 
 # 2. How to run
 The input data: 
@@ -336,11 +374,7 @@ sacct
 To see all available commands related to job monitoring, consult the following [link](https://wiki.ufz.de/eve/index.php/Job_Monitoring_SLURM).Additionnaly, you can track the GPU activity over time with [Grafana](https://grafana.web-intern.app.ufz.de) dashboard.
 
 # Comments
-- **Annotation Process:** For annotation we used the following protocol which works well and we recommend to stay with it for future datasets:
-  - The value 0 in the annotations means not labeled
-  - Completely annotate one slice in the image.
-  - If possible select slices from as many different images as possible (best case only 1 slice from a sinlge image).
-  - Add some annotations near the annotated slice and label underrepresented or unrepresentative classes (each class should be present)
+
 - **Class IDs**: In your Annotations class id 0 has the meaning of not beeing annotated. 
 In the prediction this is not needed since we have dense predictions, this means each class id is reduced by 1 (class id annotation == class id prediction +1)
 - **Number of Annotations:** With the current setup at least 5 annotations are needed (basic behaviour of nnUNet). 
