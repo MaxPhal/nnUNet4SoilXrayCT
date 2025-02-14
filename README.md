@@ -123,7 +123,7 @@ color_dict = {
     9: (  0,122, 153),  # otherPores
 }
 ````
-Once the classes are modified, you can launch the make_annotations.py script. This script takes three arguments that are passed from the command terminal as such: 
+Once the classes are modified, you can launch the `make_annotations.py` script. This script takes three arguments that are passed from the command terminal as such: 
 ````
 python make_annotations.py -i </path/to/the/images/to/annotate> -o </path/to/where/annotations/are/saved> -id <sample_ID>
 # Example
