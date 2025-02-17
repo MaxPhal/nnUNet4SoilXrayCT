@@ -1,10 +1,10 @@
 # Welcome
-This repository contains the code and documentation to run the complete nnUNet pipeline on 3D X-ray CT images of soil samples. It was developed in the framework of a collaboration between the Department of Soil System Sciences of the [Helmholtz Center for Environmental Research](https://www.ufz.de/) and the Applied Computer Vision Lab of [Helmholtz Imaging](https://www.helmholtz-imaging.de/). The main purpose of the collaboration was to promote and ease the adoption of deep learning for image segmentation tasks in soil science, with a focus on 3D X-ray CT images. Our contribution is three-fold, i.e., we have developed:  
-1. a new methodology to provide an efficient labeling strategy to obtain ground-truth annotations used as training datasets.
-2. several scripts which allow to prepare the input images to a format that is compatible with nnUNet.
-3. extra utilities which allow to extract relevant results in a format that can be diretly used for generating figures for scientific papers. These results include data such as Dice scores or the value of the Loss function as a function of the number of epochs during training. 
+This repository contains the code and documentation to run the complete nnUNet pipeline on 3D X-ray CT images of soil samples. It was developed in the framework of a collaboration between the Department of Soil System Sciences of the [Helmholtz Center for Environmental Research](https://www.ufz.de/) and the Applied Computer Vision Lab of [Helmholtz Imaging](https://www.helmholtz-imaging.de/). The main purpose of the collaboration was to promote and ease the adoption of deep learning for image segmentation tasks in soil science, with a focus on 3D X-ray CT images. Our contribution is three-fold, i.e., we developed:  
+1. A new methodology to provide an efficient labeling strategy to obtain ground-truth annotations.
+2. Several scripts to prepare the input images to a format that is compatible with nnUNet.
+3. Extra utilities to extract results in a format that can be diretly used for generating figures for scientific papers. These results include data such as Dice scores or the value of the Loss function as a function of the number of epochs during training. 
 
-In this repository, we provide a detailed explanation on how to transition from a 3D image stack to nnUNet predictions. The repository was written asumming (almost) no prerequisite programming experience from the user. In this way, we hope that it can reach a broader audience. If you used this repository and associated code for your own work, please cite the following references to acknowledge our efforts: 
+In this repository, we provide detailed explanations on how to transition from a 3D image stack to nnUNet predictions. The repository was written asumming (almost) no prerequisite programming experience of the user. In this way, we hope that it can reach a broader audience. If you used this repository and associated code for your own work, please cite the following references to acknowledge our efforts: 
 ````
 Isensee, F., Jaeger, P. F., Kohl, S. A., Petersen, J., & Maier-Hein, K. H. (2021). nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation. Nature methods, 18(2), 203-211. https://doi.org/10.1038/s41592-020-01008-z
 ````
@@ -19,11 +19,11 @@ This repository was drafted by Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HI
 Before getting down to business, let´s define a few terms to avoid any confusion. 
 - Dataset: Collection of all images and annotation
 - Image: one single (.tif, .mha or .nii.gz) file which contains the grayscale values
-- Annotation: one single (.tif, .mha or .nii.gz) file which contains the class ids - Created by you
-- Prediction: one single (.tif, .mha or .nii.gz) file which contains the class ids - Created by nnUNet
 - Class: a category present in the images, e.g., for instance "roots", "soil matrix" or "biopores" 
 - Label: the specific value assigned in the segmentation mask, e.g., 1 = Roots; 2= Soil matrix; 3 = Biopores
-- Mask: separate image that defines which pixels belong to specific classes (or labels). Masks can be binary if only background and foregound are of intestest or grayscale for multiclass segmentation 
+- Annotation: one single (.tif, .mha or .nii.gz) file which contains the labelled classes - Created by you
+- Prediction: one single (.tif, .mha or .nii.gz) file which contains the labelled classes - Created by nnUNet
+- Mask: a separate image that defines which pixels belong to specific classes (or labels). Masks can be binary if only background and foregound are of intestest or grayscale for multiclass segmentation 
     
 # Workflow
 Our workflow includes several crucial steps such as image annotation, conversion, preprocessing, model training, inference and analysis of the output data (Figure 1). The workflow was mainly developed in a Python environment. It uses several scripts (steps in italic font on figure 1) which create annotations and convert the images to nnUNet-friendly formats, before processing using the native nnUNet pipeline (steps in bold font on figure 1). 
@@ -34,24 +34,28 @@ Our workflow includes several crucial steps such as image annotation, conversion
 
 **Figure 1.** Workflow to transition from 3D X-ray CT image stacks to nnUNet predictions 
 
-Our workflow relies on the use of high performance computing (HPC) cluster to perform the computionnally demanding tasks such as training and inference. We highly recommend you doing the same because GPUs are so much faster than CPUs. Also, we have developed this workflow in a way that several GPUs can work in parallel on several cutouts of the same image. This feature allows increased processing speed, which makes it highly competitive, even against less demanding segmentation methods. If your university or research insitution does not offer access to a HPC cluster for scientific computation, consider relying on dedicated GPU Servers that can be rented. For processing tasks that rely on CPUs only, we recommend using on a regular workstation. To develop the workflow, we used a workstation running on Windows (64-bit, 767 GB RAM) for CPU tasks only. For GPU tasks only, we used the [EVE cluster](https://www.ufz.de/index.php?en=51499) of the UFZ. 
+Our workflow relies on the use of high performance computing (HPC) cluster to perform computionnally demanding tasks such as training and inference. We highly recommend you do the same because GPUs are so much faster than CPUs. Also, we have developed this workflow in a way that several GPUs can work in parallel on several cutouts of the same image. This feature allows increased processing speed, which makes it highly competitive, even against less demanding segmentation methods. If your university or research insitution does not offer access to a HPC cluster for scientific computation, consider relying on dedicated GPU Servers that can be rented. For processing tasks that rely on CPUs only, we recommend using on a regular workstation. To develop the workflow, we used a workstation running on Windows (64-bit, 767 GB RAM) for CPU tasks only. For GPU tasks only, we used the [EVE cluster](https://www.ufz.de/index.php?en=51499) of the UFZ. 
 
 # 1. Setting up your computer 
-When working with Python, we often rely on various plugins and software libraries that need to be well-organized. One effective way to manage them is by using Conda environments. A Conda environment functions like a virtual workspace or isolated system, accessible through the terminal. Software installed within one Conda environment remains separate and may not be available in others. If an environment becomes unstable—for instance, due to incompatible software—you can simply create a new one and start fresh.
 
 ## 1.1. Install Miniforge 
 Miniforge is a lightweight version of Anaconda that helps you install and manage Python and other software packages efficiently. It’s designed for flexibility and supports open-source package management with Conda, making it ideal for scientific computing and data analysis. We recommend the distribution [Miniforge](https://github.com/conda-forge/miniforge#miniforge3). For ease-of-use, it is recommended to install it for your use only and to add Conda to the PATH variable during installation.
 
-## 1.2. Install devbio-napari
-Napari is an open-source tool for viewing and analyzing large 2D and 3D images, commonly used in scientific research. It provides an interactive, user-friendly interface for exploring image data, making annotations, and applying analysis techniques. What we love so much about Napari is that it is scriptable which makes it really easy to work with. We recommend devbio-napari, a distribution of [Napari](https://github.com/haesleinhuepf/devbio-napari) with a set of plugins for bioimage analysis. In our workflow, we used Napari to perform image annotation. Please use the following command in your Miniforge terminal to install devbio-napari.
+## 1.2. Create a virtual environment <!-- Successful on BOPHY116 -->
+When working with Python, we often rely on various plugins and software libraries that need to be well-organized. One effective way to manage them is by using Conda environments. A Conda environment functions like a virtual workspace or isolated system, accessible through the terminal. Software installed within one Conda environment remains separate and may not be available in others. If an environment becomes unstable—for instance, due to incompatible software—you can simply create a new one and start fresh. Please use the following command in your Miniforge terminal to create a virtual environment.
 ````
-mamba create --name venv python=3.11 devbio-napari pyqt -c conda-forge
+mamba create -n venv python=3.11
 ````
 Replace "venv" by any name if you want to give to your virtual environment. Choose a name that is meaningful and easy to remember as you are likely to be using it often.  Make sure to activate your virtual environment before proceeding with further installations. In the rest of this document, we will assume that you named your virtual environment "venv". 
 
 Once the virtual environment is created, activate it with: 
 ````
 mamba activate venv
+````
+## 1.3. Install devbio-napari
+Napari is an open-source tool for viewing and analyzing large 2D and 3D images, commonly used in scientific research. It provides an interactive, user-friendly interface for exploring image data, making annotations, and applying analysis techniques. What we love so much about Napari is that it is scriptable which makes it really easy to work with. We recommend devbio-napari, a distribution of [Napari](https://github.com/haesleinhuepf/devbio-napari) with a set of plugins for bioimage analysis. In our workflow, we used Napari to annotate images. Please use the following command in your Miniforge terminal to install devbio-napari.
+````
+mamba install devbio-napari pyqt -c conda-forge
 ````
 
 ## 1.4. Install PyTorch
@@ -93,7 +97,7 @@ ImageJ is a free, open-source image processing software widely used in scientifi
 Open the \_\_path__.py file (from this repository) with a Text Editor and adapt the paths according to your local installations. You have to define the path to your ImageJ application as well as the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation).
 
 # 2. Image annotation
-For image annotation, we developed a strategy that minimizes annotation efforts while still ensuring that all relevant classes are captured. This strategy relies on dense annotations of one slice and on sparse annotations for interesting features within a stack (see figure 2 in our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1). To perform dense annotations, the middle slice of stack was segmented with Otsu thresholding and heavily annotated manually for other interesting features. To do so in a semi-automatic manner, we created the `make_annotations.py` script. Before launching this script your Miniforge terminal, make sure to adapt the lines 60 to 86 according to the classes that you want to segment. Below, we show the class definition that we used for the Dataset 1 (see our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1) for more information).
+For image annotation, we developed a strategy that minimizes annotation efforts while still ensuring that all relevant classes are captured. This strategy relies on dense annotations of one slice and on sparse annotations for interesting features within a stack (see figure 2 in our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1)). To perform dense annotations, the middle slice of the stack was segmented with Otsu thresholding and heavily annotated manually for other interesting features. To do so in a semi-automatic manner, we created the `make_annotations.py` script. Before launching this script your Miniforge terminal, make sure to adapt the lines 60 to 86 according to the classes that you want to segment. Below, we show the class definition that we used for the Dataset 1 (see our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1) for more information).
 
 ````
 label_names = {
@@ -123,7 +127,7 @@ color_dict = {
     9: (  0,122, 153),  # otherPores
 }
 ````
-Once the classes are modified, you can launch the `make_annotations.py` script. This script takes three arguments that are passed from the command terminal as such: 
+Once the classes are modified and colors are defined for each label, you can launch the `make_annotations.py` script. This script takes three arguments, i.e., the input folder path (the path to the folder containing the images that you want to annotate), the output folder path (the path to the folder where the annotations will be saved) and the sample ID (the name of your image). These arguments are passed from the command terminal with the three flags "-i", "-o" and "-id" respectively.   
 ````
 python make_annotations.py -i </path/to/the/images/to/annotate> -o </path/to/where/annotations/will_be/saved> -id <sample_ID>
 # Example
@@ -131,7 +135,8 @@ python make_annotations.py -i C:\Users\phalempi\Desktop\scans -o C:\Users\phalem
 ````
 IMPORTANT: The input image should a be a 3D .tif stack so that the it can be loaded. 
 
-For the annotations, make sure to select slices from as many different images as possible (best case only 1 slice from a single image) and to add some annotations near the annotated slice and label underrepresented or unrepresentative classes. In the annotations, the class id 0 should never be annotated as it is the class "To be predicted". 
+
+NOTE: For the annotations, make sure to select slices from as many different images as possible (best case only 1 slice from a single image) and to add some annotations near the annotated slice and label underrepresented or unrepresentative classes. In the annotations, the label 0 should never be annotated as it is the class "To be predicted". 
 
 # 2. How to run
 The input data: 
