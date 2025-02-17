@@ -1,34 +1,32 @@
 # Welcome
-This repository contains the code and documentation to run the complete nnUNet pipeline on X-ray CT images of soil samples. It was developed in the framework of a collaboration between the Department of Soil System Sciences of the [Helmholtz Center for Environmental Research](https://www.ufz.de/) and the Applied Computer Vision Lab of [Helmholtz Imaging](https://www.helmholtz-imaging.de/). The main purpose of the collaboration was to promote and ease the adoption of deep learning for image segmentation tasks in soil science, with a focus on 3D X-ray CT images. In that prospect, we provide a detailed explanation on how to transition from a 3D image stack to nnUNet predictions. The repository was written asumming (almost) no prerequisite programming experience from the user. In this way, we hope that it can reach a broader audience. If you used this repository and associated code for your own work, make sure to cite the following references to acknowledge our efforts: 
+This repository contains the code and documentation to run the complete nnUNet pipeline on 3D X-ray CT images of soil samples. It was developed in the framework of a collaboration between the Department of Soil System Sciences of the [Helmholtz Center for Environmental Research](https://www.ufz.de/) and the Applied Computer Vision Lab of [Helmholtz Imaging](https://www.helmholtz-imaging.de/). The main purpose of the collaboration was to promote and ease the adoption of deep learning for image segmentation tasks in soil science, with a focus on 3D X-ray CT images. Our contribution is three-fold, i.e., we have developed:  
+1. a new methodology to provide an efficient labeling strategy to obtain ground-truth annotations used as training datasets.
+2. several scripts which allow to prepare the input images to a format that is compatible with nnUNet.
+3. extra utilities which allow to extract relevant results in a format that can be diretly used for generating figures for scientific papers. These results include data such as Dice scores or the value of the Loss function as a function of the number of epochs during training. 
+
+In this repository, we provide a detailed explanation on how to transition from a 3D image stack to nnUNet predictions. The repository was written asumming (almost) no prerequisite programming experience from the user. In this way, we hope that it can reach a broader audience. If you used this repository and associated code for your own work, please cite the following references to acknowledge our efforts: 
 ````
 Isensee, F., Jaeger, P. F., Kohl, S. A., Petersen, J., & Maier-Hein, K. H. (2021). nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation. Nature methods, 18(2), 203-211. https://doi.org/10.1038/s41592-020-01008-z
 ````
 ````
 Phalempin, M., Krämer, L., Geers-Lucas, M., Isensee, F., & Schlüter, S. (2024). Advanced segmentation of soil constituents in X-ray CT images using nnUNet. Authorea Preprints. https://doi.org/10.22541/essoar.173395846.68597189/v1
 ````
-Our contribution is three-fold, i.e., we have developed:  
-1. a new methodology to provide an efficient labeling strategy to obtain ground-truth annotations used as training datasets.
-2. several scripts which allow to prepare the input images to a format that is compatible with nnUNet.
-3. extra utilities which allow to extract relevant results in a format that can be diretly used for generating figures for scientific papers. These results include data such as Dice scores or the value of the Loss function as a function of the number of epochs during training. 
-
-We hope you will find this repository helpful! We wish a you a lot of fun working with nnUNet :). 
-
-Feel free to contact us if you want to share your experience using nnUNet on your X-ray CT images of soil samples.
+We hope you will find this repository helpful! We wish a you a lot of fun working with nnUNet :). Feel free to contact us if you want to share your experience using nnUNet on your X-ray CT images of soil samples.
 
 This repository was drafted by Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HIP). It was reviewed and edited by Steffen Schlüter (UFZ), Maik Geers-Lucas (TUBerlin) and Fabian Isensee (DKFZ, HIP),
 
 # Nomenclature
-The following terms are frequently used in this documentation. 
-They might have some slightly different meanings in our different communities, this is how we used them in this document.
+Before getting down to business, let´s define a few terms to avoid any confusion. 
 - Dataset: Collection of all images and annotation
-- Image: one single (.mha or .nii.gz) file which contains the grayscale values
-- Annotation: one single (.mha or .nii.gz) file which contains the class ids - Created by you
-- Prediction: one single (.mha or .nii.gz) file which contains the class ids - Created by nnUNet
-- Class:
-- Label:
+- Image: one single (.tif, .mha or .nii.gz) file which contains the grayscale values
+- Annotation: one single (.tif, .mha or .nii.gz) file which contains the class ids - Created by you
+- Prediction: one single (.tif, .mha or .nii.gz) file which contains the class ids - Created by nnUNet
+- Class: a category present in the images, e.g., for instance "roots", "soil matrix" or "biopores" 
+- Label: the specific value assigned in the segmentation mask, e.g., 1 = Roots; 2= Soil matrix; 3 = Biopores
+- Mask: separate image that defines which pixels belong to specific classes (or labels). Masks can be binary if only background and foregound are of intestest or grayscale for multiclass segmentation 
     
 # Workflow
-The developed workflow includes several crucial steps such as image annotation, conversion, preprocessing, model training, inference and analysis of the output data (Figure 1). The workflow was mainly developed in a Python environment. It uses several scripts (steps in italic font on figure 1) which create annotations and convert the images to nnUNet-friendly formats, before processing using the native nnUNet pipeline (steps in bold font on figure 1). 
+Our workflow includes several crucial steps such as image annotation, conversion, preprocessing, model training, inference and analysis of the output data (Figure 1). The workflow was mainly developed in a Python environment. It uses several scripts (steps in italic font on figure 1) which create annotations and convert the images to nnUNet-friendly formats, before processing using the native nnUNet pipeline (steps in bold font on figure 1). 
 
 <p align="center">
   <img src="Figures/Workflow.png" width="500"> 
