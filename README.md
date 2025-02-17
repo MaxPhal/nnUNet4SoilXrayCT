@@ -36,68 +36,32 @@ Our workflow includes several crucial steps such as image annotation, conversion
 
 Our workflow relies on the use of high performance computing (HPC) cluster to perform computionnally demanding tasks such as training and inference. We highly recommend you do the same because GPUs are so much faster than CPUs. Also, we have developed this workflow in a way that several GPUs can work in parallel on several cutouts of the same image. This feature allows increased processing speed, which makes it highly competitive, even against less demanding segmentation methods. If your university or research insitution does not offer access to a HPC cluster for scientific computation, consider relying on dedicated GPU Servers that can be rented. For processing tasks that rely on CPUs only, we recommend using on a regular workstation. To develop the workflow, we used a workstation running on Windows (64-bit, 767 GB RAM) for CPU tasks only. For GPU tasks only, we used the [EVE cluster](https://www.ufz.de/index.php?en=51499) of the UFZ. 
 
-# 1. Setting up your computer 
-
-## 1.1. Install Miniforge 
+# 1.  Groundtruth data preparation 
+# 1.1 Setting up your computer 
+## 1.1.1 Install Miniforge 
 Miniforge is a lightweight version of Anaconda that helps you install and manage Python and other software packages efficiently. It’s designed for flexibility and supports open-source package management with Conda, making it ideal for scientific computing and data analysis. We recommend the distribution [Miniforge](https://github.com/conda-forge/miniforge#miniforge3). For ease-of-use, it is recommended to install it for your use only and to add Conda to the PATH variable during installation.
 
-## 1.2. Create a virtual environment <!-- Successful on BOPHY116 -->
+## 1.1.2. Create a virtual environment <!-- Successful on BOPHY116 -->
 When working with Python, we often rely on various plugins and software libraries that need to be well-organized. One effective way to manage them is by using Conda environments. A Conda environment functions like a virtual workspace or isolated system, accessible through the terminal. Software installed within one Conda environment remains separate and may not be available in others. If an environment becomes unstable—for instance, due to incompatible software—you can simply create a new one and start fresh. Please use the following command in your Miniforge terminal to create a virtual environment.
 ````
-mamba create -n venv python=3.11
+mamba create -n venv-napari python=3.11
 ````
-Replace "venv" by any name if you want to give to your virtual environment. Choose a name that is meaningful and easy to remember as you are likely to be using it often.  Make sure to activate your virtual environment before proceeding with further installations. In the rest of this document, we will assume that you named your virtual environment "venv". 
-
-Once the virtual environment is created, activate it with: 
+Replace "venv-napari" by any name if you want to give to your virtual environment. Choose a name that is meaningful and easy to remember as you are likely to be using it often.  Make sure to activate your virtual environment before proceeding with further installations. Once the virtual environment is created, activate it with: 
 ````
-mamba activate venv
+mamba activate venv-napari
 ````
-## 1.3. Install devbio-napari
+## 1.1.3. Install devbio-napari <!-- Successful on BOPHY116 -->
 Napari is an open-source tool for viewing and analyzing large 2D and 3D images, commonly used in scientific research. It provides an interactive, user-friendly interface for exploring image data, making annotations, and applying analysis techniques. What we love so much about Napari is that it is scriptable which makes it really easy to work with. We recommend devbio-napari, a distribution of [Napari](https://github.com/haesleinhuepf/devbio-napari) with a set of plugins for bioimage analysis. In our workflow, we used Napari to annotate images. Please use the following command in your Miniforge terminal to install devbio-napari.
 ````
 mamba install devbio-napari pyqt -c conda-forge
 ````
 
-## 1.4. Install PyTorch
-PyTorch is an open-source machine learning library for Python, widely used for deep learning and artificial intelligence. It provides flexible tools for building, training, and deploying neural networks, with strong support for GPUs and dynamic computation graphs. To install PyTorch, enter the following command: 
-````
-pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
-````
-Note that, here, we install an older PyTorch version (compatible with the CUDA platform 11.7). More recent versions of CUDA are currently available, however we have not yet tried them.
+# 1.2. Image selection
+For the annotations, make sure to select slices from as many different images as possible (best case only 1 slice from a single image) and to add some annotations near the annotated slice and label underrepresented or unrepresentative classes. In the annotations, the label 0 should never be annotated as it is the class "To be predicted". We recommend to prepare image cutouts having the same x-y extent as the original but only 300 slices in the Z-direction. 
+IMPORTANT: The selected images for groundtruth generation should be in a 3D .tif file format.  
 
-## 1.5. Install nnUNet
-nnUNet is a self-configuring deep learning framework for medical image segmentation. It automatically adapts to new datasets by optimizing preprocessing, network architecture, and training settings, making it a powerful and user-friendly tool for segmentation tasks. More information on nnUNet can be found [here](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/installation_instructions.md#installation-instructions). To install nnUNet, enter the following commands: 
-````
-git clone https://github.com/MIC-DKFZ/nnUNet.git
-cd nnUNet
-pip3 install -e .
-````
-After installing nnUNet, create three folders named nnUNet_raw, nnUNet_preprocessed and nnUNet_results. After creating the folders, set them as environmental variables using the following commands in your Miniforge
-terminal: 
-````
-set nnUNet_raw= your/path/to/nnUNet_raw
-set nnUNet_preprocessed=your/path/to/nnUNet_preprocessed
-set nnUNet_results=your/path/to/nnUNet_results
-````
-
-## 1.6. Download ImageJ
-ImageJ is a free, open-source image processing software widely used in scientific research. In our workflow, we used ImageJ to convert the input images to a nnUNet-friendly format. You can download ImageJ (Fiji) from [here](https://imagej.net/software/fiji/downloads#other-downloads).
-
-## 1.7. Download the files from this repository and place them in appropriate folders
-1. Put the imageJ macros (files ending with .ijm) into the macros folder in the Fiji app (at .../Fiji.app/macros).
-   
-   **For Windows**: The files are convert_mha_to_img.ijm, convert_nii_to_mha.ijm and convert_tif_to_mha.ijm.
-   
-   **For Ubuntu**: convert_mha_to_img_ubuntu.ijm, convert_nii_to_mha_ubuntu.ijm.
-    If the Ubuntu scripts are used, remove the _ubuntu sufices in the filenames.
-3. Put the nnUNetTrainer_betterIgnoreSampling.py into nnunet/nnunetv2/training/nnUNetTrainer/variants/sampling/
-4. Place nifti_io.jar into the plugins folder of ImageJ (at ../Fiji.app/plugins").
-   
-## 1.7.Setting file paths
-Open the \_\_path__.py file (from this repository) with a Text Editor and adapt the paths according to your local installations. You have to define the path to your ImageJ application as well as the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation).
-
-# 2. Image annotation
-For image annotation, we developed a strategy that minimizes annotation efforts while still ensuring that all relevant classes are captured. This strategy relies on dense annotations of one slice and on sparse annotations for interesting features within a stack (see figure 2 in our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1)). To perform dense annotations, the middle slice of the stack was segmented with Otsu thresholding and heavily annotated manually for other interesting features. To do so in a semi-automatic manner, we created the `make_annotations.py` script. Before launching this script your Miniforge terminal, make sure to adapt the lines 60 to 86 according to the classes that you want to segment. Below, we show the class definition that we used for the Dataset 1 (see our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1) for more information).
+# 1.3. Image annotation
+For image annotation, we developed a strategy that minimizes annotation efforts while still ensuring that all relevant classes are captured. This strategy relies on dense annotations of one slice and on sparse annotations for interesting features within a stack (see figure 2 in our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1)). To perform dense annotations, the middle slice of the stack was segmented with Otsu thresholding and heavily annotated manually for other interesting features. To do so in a semi-automatic manner, we created the `make_annotations.py` script. Before launching this script in your Miniforge terminal, make sure to adapt the lines 60 to 86 according to the classes that you want to segment. Below, we show the class definition that we used for the Dataset 1 (see our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1) for more information).
 
 ````
 label_names = {
@@ -127,35 +91,61 @@ color_dict = {
     9: (  0,122, 153),  # otherPores
 }
 ````
-Once the classes are modified and colors are defined for each label, you can launch the `make_annotations.py` script. This script takes three arguments, i.e., the input folder path (the path to the folder containing the images that you want to annotate), the output folder path (the path to the folder where the annotations will be saved) and the sample ID (the name of your image). These arguments are passed from the command terminal with the three flags "-i", "-o" and "-id" respectively.   
+Note that the label 0 should also be set to the soil matrix. Once the classes are modified according to your dataset and the colors are defined for each label, you can launch the `make_annotations.py` script. This script takes three arguments, i.e., the input folder path (the path to the folder containing the images that you want to annotate), the output folder path (the path to the folder where the annotations will be saved) and the sample ID (the name of your image). These arguments are passed from the command terminal with the three flags "-i", "-o" and "-id" respectively.   
 ````
 python make_annotations.py -i </path/to/the/images/to/annotate> -o </path/to/where/annotations/will_be/saved> -id <sample_ID>
 # Example
 python make_annotations.py -i C:\Users\phalempi\Desktop\scans -o C:\Users\phalempi\Desktop\annotations -id SPP_P21_SPE_UC193
 ````
-IMPORTANT: The input image should a be a 3D .tif stack so that the it can be loaded. 
+Just a few moment after launching the script, the image name and shape will be printed in the terminal. Afterwards, the GUI of Napari pops up and displays the middle slice of the loaded image. On that middle slice, the soil matrix appears in color (115,  0, 102) (RGB). To get familiar with the GUI of Napari, we recommend to consult external resources. There are some very good explanatory videos out there (for instance on YouTube) that show how to efficiently annotate images with Napari. Because a short video is more impactful than a those words, we won´t go over the procedure in this repository. Once you are done annotating your images, just close the Napari GUI and the annotated images will be automatically saved under the path you have given after the flag -o. Before going further with data preparation, make sure to deactivate the current virtual environment.
+````
+mamba deactivate
+````
+# 2. Data preparation 
+# 2.1. Setting up your computer 
+## 2.1.1. Create a virtual environment <!-- Successful on BOPHY116 -->
+Unfortunately, devbio-napari can not be installed in the same virtual environment because of conflicts between version packages. This means that we are gonna need to install another virtual environment to work with nnUNet. We can create a virtual environment and activate with a single command line as follows: 
+````
+mamba create -n venv-nnunet python=3.11 && conda activate venv-nnunet
+````
+## 2.1.2. Install git <!-- Successful on BOPHY116 -->
+Git is a version control system that helps track changes in code and collaborate on projects. Git can also be used to download code as it allows users to clone repositories from remote servers (e.g., GitHub, GitLab, Bitbucket). This is useful for accessing open-source projects, collaborating on code, or deploying software. Here, we are gonna to use git to download the nnUNet repository from GitHub. To install git, type the following command in your terminal.
+````
+mamba install git
+````
+## 2.1.3. Install nnUNet <!-- Successful on BOPHY116 -->
+nnUNet is a self-configuring deep learning framework for medical image segmentation. It automatically adapts to new datasets by optimizing preprocessing, network architecture, and training settings, making it a powerful and user-friendly tool for segmentation tasks. More information on nnUNet can be found [here](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/installation_instructions.md#installation-instructions). To install nnUNet, enter the following commands: 
+````
+git clone https://github.com/MIC-DKFZ/nnUNet.git
+cd nnUNet
+pip3 install -e .
+````
+After installing nnUNet, create some folders named "nnUNet_raw" and "nnUNet_preprocessed". After creating the folders, set them as environmental variables using the following commands in your Miniforge
+terminal: 
+````
+set nnUNet_raw= your/path/to/nnUNet_raw
+set nnUNet_preprocessed=your/path/to/nnUNet_preprocessed
+````
 
+## 2.1.4. Download ImageJ <!-- Successful on BOPHY116 -->
+ImageJ is a free, open-source image processing software widely used in scientific research. In our workflow, we used ImageJ to convert the input images to a nnUNet-friendly format. You can download ImageJ (Fiji) from [here](https://imagej.net/software/fiji/downloads#other-downloads).
 
-NOTE: For the annotations, make sure to select slices from as many different images as possible (best case only 1 slice from a single image) and to add some annotations near the annotated slice and label underrepresented or unrepresentative classes. In the annotations, the label 0 should never be annotated as it is the class "To be predicted". 
+## 2.1.5. Download the files from this repository and place them in appropriate folders 
+1. Put the imageJ macros (files ending with .ijm) into the macros folder in the Fiji app (at .../Fiji.app/macros).
+   
+   **For Windows**: The files are convert_mha_to_img.ijm, convert_nii_to_mha.ijm and convert_tif_to_mha.ijm.
+   
+   **For Ubuntu**: convert_mha_to_img_ubuntu.ijm, convert_nii_to_mha_ubuntu.ijm.
+    If the Ubuntu scripts are used, remove the _ubuntu sufices in the filenames.
+3. Put the nnUNetTrainer_betterIgnoreSampling.py into nnunet/nnunetv2/training/nnUNetTrainer/variants/sampling/
+4. Place nifti_io.jar into the plugins folder of ImageJ (at ../Fiji.app/plugins").
+   
+## 2.1.6. Setting file paths
+Open the \_\_path__.py file (from this repository) with a Text Editor and adapt the paths according to your local installations. You have to define the path to your ImageJ application as well as the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation).
 
-# 2. How to run
-The input data: 
-You have to keep in mind that nnUNet (as well as the scripts here) are folder based. 
-This means that all images should be in one folder as well as all annotations should be in one folder.
-Also for predicting, all images which should be predicted have to be in one folder and the predictions will be saved into another folder.
-
-## Training
-
-### 2.1. Converting your data into the nnUNet format
-This step takes the image and annotation files from two given folders, processes them and saves them as .nii.gz in the nnUNet_raw folder.
-The processing entails:
-- Transferring the .mha files to .nii.gz 
-- Handling the ignore label in the annotations 
-- Cropping image and annotation to the relevant parts 
-- Normalizing the image crops
-- Put everything into the nnUNet format (adhering to nnUNets naming conventions of folders and files and creating a dataset.json)
-
-For each new dataset you want to use for training you have to adopt the following hyperparameters in `preprocessing_nnUNet_train.py` (starting in line 133). Some examples and additional explanations are given in the `preprocessing_nnUNet_train.py` script.
+# 2.2. Data conversion
+This step takes the image and annotation files from two given folders, processes them and saves them as .nii.gz in the nnUNet_raw folder. Here, you have to keep in mind that our workflow was developed so as to work in a "folder-based" manner. 
+This means that all images should be in one folder and all annotations should be in another one. Data conversion entails converting the input files to .nii.gz, handling the ignore label in the annotations, cropping image and annotation to the relevant parts, normalizing the image crops and putting everything into the nnUNet format (adhering to nnUNets naming conventions of folders and files and creating a dataset.json). For each new dataset, you have to adapt the following hyperparameters in `preprocessing_nnUNet_train.py` (starting in line 133). Some examples and additional explanations are given in the `preprocessing_nnUNet_train.py` script.
 
 ```python
 input_dir_images = "" # Path to the Images
@@ -163,31 +153,62 @@ input_dir_masks = ""# Path to the Annotations
 DatasetName = ""# Some Name
 TaskID = 555 # A Unique ID 
 Classes = ["A","B",...] # List of names for each class in the correct order
+norm_type= "zscore" # one of [noNorm, zscore, rescale_to_0_1, rgb_to_0_1] with default==zscore
 img_file_postfix = "" # Postfix of the image files, needed to find the corresponding annotation for each image
 ```
+**Note:** You have the following options for the normalization. It is important to select the same normalization type when running preprocessing_nnUNet_predict:
+- *noNorm*: No normalization is done
+- *zscore*: This is the default, normalize by mean and std: ```(img - mean_) / std_```
+- *rescale_to_0_1*: rescale the values to the range of 0 and 1: ```(img-min_)/(max_-min_)```
+- *rgb_to_0_1*: Just divide by 255: ```img/255```
 
-Afterwards, you can start converting your data by running:
-
+Once you have modified the hyperparameters accordingly, you can start converting your data by running:
 ````shell
 python preprocessing_nnUNet_train.py
 ````
 
-### 2.2. nnUNet preprocessing 
-This is the default nnUNet preprocessing. This takes the data from nnUNet_raw, processes them and saves them in the nnUNet_preprocessed folder.
-Depending on your data this can take a while and consume a lot of RAM.
-You can run the preprocessing with the following command.
-The TaskID parameter has to be the one you defined in the previous step.
-The -np and -npfp parameters define how many processes are used during the preprocessing. 
-A higher number means the preprocessing is faster but more RAM is consumed and with lower numbers less RAM is needed but the processing will take longer.
-You can play around with this parameter, for me 4 worked well.
+# 2.3. Preprocessing and planing
+The preprocessing and experiment planing are default steps in the native nnUNet pipeline. These steps use the data from nnUNet_raw, processes them and saves them in the nnUNet_preprocessed folder. Depending on your data this can take a while and consume a lot of RAM. You can run the preprocessing with the following command.
 
 ```shell
 nnUNetv2_plan_and_preprocess -d <TaskID> -c 3d_fullres -np <num.processes> -npfp <num.processes>
 # Example
 nnUNetv2_plan_and_preprocess -d 555 -c 3d_fullres -np 4 -npfp 4
 ```
+The TaskID parameter has to be the one you defined in the previous step. The -np and -npfp parameters define how many processes are used during the preprocessing.  A higher number means the preprocessing is faster but more RAM is consumed and with lower numbers less RAM is needed but the processing will take longer. You can play around with this parameter, for us 4 worked well. Now that your data abides to the nnUNet format and are preprocessed, the training process can start.
 
-### 2.3. nnUNet training 
+# 3. Training
+# 3.1. A few words computation on HPC Clusters
+An HPC cluster is a system made up of multiple interconnected computers (often called nodes) that work together to perform complex computations. These clusters are designed to handle tasks that require a large amount of computational power, such as scientific simulations, data analysis, machine learning, or rendering. Most HPC clusters run on Linux due to its stability, scalability, and open-source nature. Linux offers better performance for parallel computing and has robust support for managing resources and running distributed applications. HPC clusters typically use a job scheduler (like Slurm) to allocate resources and manage the execution of computational tasks across the nodes. For the rest of this example, we will assume that you also dispose of a cluster running a SLURM job scheduler. 
+
+# 3.2. Connecting to your HPC Cluster
+How you connect to your HPC Cluster is mostly gonna dependent on the infrastructure and software available in your university or research institution. At the UFZ, we have prefered to use softwares with GUIs. For this, we have used FileZilla to transfer local files (i.e., the files on your workstation) to remote locations (i.e., folders on the HPC). We have also used X2GO client to connect to the head node of the cluster and send jobs across the cluster. We recommend that you contact your IT administrator to figure out what is the easiest solution for you. In the following, we will assume that got these steps right and that you could successfully connect to your HPC Cluster.
+
+# 3.3. Setting up your HPC Cluster
+## 3.3.1. Setting  up a virtual environment
+Because we are now physically using another computer, we have to create (again) a new virtual environment for nnUNet. Since the cluster runs on Linux OS, the commmands to create virtual environment slightly differ. Here is an example:
+
+````shell
+python -m venv /home/username/venv-nnunet
+````
+where "username" is your login name and "venv-nnunet" is the name of your virtual environment. Here we used venv-nnunet to be consistent with the previous naming.
+
+Then activate the virtual environment with the following command: 
+````shell
+source /home/username/venv/bin/activate
+````
+
+## 3.3.2. Install PyTorch
+Once your virtual environment is created, you can now install PyTorch. PyTorch is an open-source machine learning library for Python, widely used for deep learning and artificial intelligence. It provides flexible tools for building, training, and deploying neural networks, with strong support for GPUs and dynamic computation graphs. To install PyTorch, enter the following command: 
+````
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
+````
+Note that, here, we install an older PyTorch version (compatible with the CUDA platform 11.7). More recent versions of CUDA are currently available, however we have not yet tried them.
+
+## 3.3.3. Install nnUNet
+To install nnUNet, please repeat the operation described at the section 2.1.3. 
+
+# 3.4. Creation of classifiers
 This step trains nnUNet with the data from nnUNet_preprocessed and saves the models, logs and checkpoints in nnUNet_results.
 The content of nnUNet_preprocessed is used during training. 
 If preprocessing and training are done on different devices you have to sync the nnUNet_preprocessed folder to the device on which you want to train. nnUNet is trained using 5-fold cross-validation. 
@@ -208,8 +229,7 @@ Note that during training, checkpoints are automatically created after 50 epochs
 nnUNetv2_train <TaskID> 3d_fullres <fold> -tr nnUNetTrainer_betterIgnoreSampling --c
 ````
 
-### 2.4. Predicting
-
+# 4. Inference
 When the five training folds are completed we can use the model to make predictions.
 For the predictions, the content of the nnUNet_results folder is needed. 
 If training and predicting are done on different devices you have to sync the nnUNet_results folder to the device on which you want to predict.
@@ -255,17 +275,6 @@ The EVE cluster is a high performance computing cluster (HPC) available to the e
 ## 3.2. Getting started on EVE
 To get started with the EVE cluster, first contact the wkdv at the following address wkdv-cluster@ufz.de to be granted access. Once granted access, install FileZilla and X2Go Client via the portal manager. FileZilla is a software which enables file transfers between your computer and the cluster whereas X2Go Client provides a full remote graphical desktop environment to establish command-line connections to the cluster. Full instructions on how to set-up FileZilla and X2Go are provided on the [EVE Cluster wiki](https://wiki.ufz.de/eve/index.php/Main_Page).
 
-## 3.3. Setting  up a virtual environment
-It is recommended to install nnUNet and its dependencies in a python virtual environment. To do so, execute the following commmand, where "username" is your UFZ login name and "venv" is the name of your virtual environment.
-
-````shell
-python -m venv /home/username/venv
-````
-Then activate the virtual environment
-
-````shell
-source /home/username/venv/bin/activate
-````
 
 Then install PyTorch with the following command
 ````shell
@@ -281,10 +290,10 @@ Because of the current constraints associated with running ImageJ on a HPC, it i
 
 ## 3.6. Training nnUNet on the EVE cluster
 
-To run the training on the EVE cluster, create a shell file (.sh) named (for instance) submit_nnunet_tr_fold0.sh using nano. 
+To run the training on the EVE cluster, create a shell file (.sh) named (for instance) submit_nnunet_tr_fold0.sh using gedit. 
 
 ````shell
-nano submit_nnunet_tr_fold0.sh 
+gedit submit_nnunet_tr_fold0.sh 
 ````
 Copy then the following lines of codes within the shell file
 
@@ -303,7 +312,7 @@ Copy then the following lines of codes within the shell file
 #SBATCH -G nvidia-a100:1            # request specifically a NVIDIA A100 
 
 ###  activating  the virtual environment
-source /home/username/venv/bin/activate 
+source /home/username/venv-nnunet/bin/activate 
 ## declaring the environment variable
 export nnUNet_preprocessed="/data/bosys-nnunet/nnUNet_preprocessed" 
 export nnUNet_results="/work/phalempi/nnUNet_results" 
