@@ -177,8 +177,23 @@ nnUNetv2_plan_and_preprocess -d 555 -c 3d_fullres -np 4 -npfp 4
 ```
 The TaskID parameter has to be the one you defined in the previous step. The -np and -npfp parameters define how many processes are used during the preprocessing.  A higher number means the preprocessing is faster but more RAM is consumed and with lower numbers less RAM is needed but the processing will take longer. You can play around with this parameter, for us 4 worked well. Now that your data abides to the nnUNet format and are preprocessed, the training process can start.
 
+# 2.4. Preprocessing of the images to be predicted 
+This step aims to preprocess the images that you want to run the predictions on (i.e., the ones that were not selected as part of the training dataset). This preprocessing mainly entails an image normalization and a conversion from a 3D .tif stack to a format nnUNet can read, i.e., .nii.gz. To convert the images with the following command: 
+````shell
+python preprocessing_nnUNet_predict.py -i /path/to/images_mha -o /path/to/images_nii
+````
+
+
+2. **(Optional) Split the images:** To increase the inference speed divide the images into smaller parts to fit onto the gpu.
+````shell
+python preprocessing_nnUNet_predict_split.py -i <input.paht.to.imgs> -o <output.path.for.splits> -m <path.to.model> -s <num_plits>
+# Also works without giving the model path, but default values are taken then
+python preprocessing_nnUNet_predict_split.py -i <input.paht.to.imgs> -o <output.path.for.splits> -s <num_plits>
+# Example
+python preprocessing_nnUNet_predict_split.py -i /media/l727r/data/UFZ_CTPoreRootSegmentation/HI_dataset2_grass_vs_crop/test_splitting/images -o /media/l727r/data/UFZ_CTPoreRootSegmentation/HI_dataset2_grass_vs_crop/test_splitting/images_split -s 8 -m /home/l727r/Documents/cluster-checkpoints/nnUNetv2_trained_models/Dataset167_UFZ_Dataset2_grass_vs_crop_v2/nnUNetTrainer_betterIgnoreSampling_noSmooth__nnUNetPlans__3d_fullres
+````
 # 3. Training
-# 3.1. A few words computation on HPC Clusters
+# 3.1. A few words on computation on HPC Clusters
 An HPC cluster is a system made up of multiple interconnected computers (often called nodes) that work together to perform complex computations. These clusters are designed to handle tasks that require a large amount of computational power, such as scientific simulations, data analysis, machine learning, or rendering. Most HPC clusters run on Linux due to its stability, scalability, and open-source nature. Linux offers better performance for parallel computing and has robust support for managing resources and running distributed applications. HPC clusters typically use a job scheduler (like Slurm) to allocate resources and manage the execution of computational tasks across the nodes. For the rest of this example, we will assume that you also dispose of a cluster running a SLURM job scheduler. 
 
 # 3.2. Connecting to your HPC Cluster
@@ -234,20 +249,6 @@ When the five training folds are completed we can use the model to make predicti
 For the predictions, the content of the nnUNet_results folder is needed. 
 If training and predicting are done on different devices you have to sync the nnUNet_results folder to the device on which you want to predict.
 
-1. **Preprocessing to match the nnUNet format:** Mainly convert .mha to .nii.gz, normalize the image and rename the file.
-````shell
-python preprocessing_nnUNet_predict.py -i <input.path.to.mha.images> -o <output.path.to.nii.gz.images>
-# Example
-python preprocessing_nnUNet_predict.py -i /home/l727r/Desktop/UFZ_2022_CTPoreRootSegmentation/images_mha -o /home/l727r/Desktop/UFZ_2022_CTPoreRootSegmentation/images_nii
-````
-2. **(Optional) Split the images:** To increase the inference speed divide the images into smaller parts to fit onto the gpu.
-````shell
-python preprocessing_nnUNet_predict_split.py -i <input.paht.to.imgs> -o <output.path.for.splits> -m <path.to.model> -s <num_plits>
-# Also works without giving the model path, but default values are taken then
-python preprocessing_nnUNet_predict_split.py -i <input.paht.to.imgs> -o <output.path.for.splits> -s <num_plits>
-# Example
-python preprocessing_nnUNet_predict_split.py -i /media/l727r/data/UFZ_CTPoreRootSegmentation/HI_dataset2_grass_vs_crop/test_splitting/images -o /media/l727r/data/UFZ_CTPoreRootSegmentation/HI_dataset2_grass_vs_crop/test_splitting/images_split -s 8 -m /home/l727r/Documents/cluster-checkpoints/nnUNetv2_trained_models/Dataset167_UFZ_Dataset2_grass_vs_crop_v2/nnUNetTrainer_betterIgnoreSampling_noSmooth__nnUNetPlans__3d_fullres
-````
 3. **nnUNet_predict:** The trained nnUNet models are used to predict the files.
 ````shell
 nnUNetv2_predict -i <input.path.to.nii.gz.images> -o <output.path.to.nii.gz.predictions> -d <TaskID> -tr nnUNetTrainer_betterIgnoreSampling -c 3d_fullres
