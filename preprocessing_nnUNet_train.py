@@ -33,7 +33,7 @@ def convert_mha_to_hdr(input_dir: str, output_dir: str) -> None:
     
 def convert_tif_to_hdr(input_dir: str, output_dir: str) -> None:
     """
-    Use ImageJ and the convert_mha_to_img macro script to convert .mha files to .hdr & .img files
+    Use ImageJ and the convert_tif_to_img macro script to convert .tif files to .hdr & .img files
 
     :param input_dir: path to the input folder which contains the .mha files
     :param output_dir: path to the folder in which the output should be saved in
