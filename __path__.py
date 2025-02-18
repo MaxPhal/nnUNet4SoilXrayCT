@@ -9,3 +9,5 @@
 # Windows - My paths
 PATH_ImageJ = r"C:\Users\phalempi\Desktop\Fiji.app\ImageJ-win64.exe"
 PATH_nnUNet_raw= r"F:\phalempin\nnUNet_raw"
+input_dir_images = r"F:\phalempin\images"
+input_dir_annotations = r"F:\phalempin\annotations"

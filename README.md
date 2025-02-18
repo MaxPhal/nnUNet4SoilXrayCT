@@ -23,7 +23,7 @@ Before getting down to business, let´s define a few terms to avoid any confusio
 - Label: the specific value assigned in the segmentation mask, e.g., 1 = Roots; 2= Soil matrix; 3 = Biopores
 - Annotation: one single (.tif, .mha or .nii.gz) file which contains the labelled classes - Created by you
 - Prediction: one single (.tif, .mha or .nii.gz) file which contains the labelled classes - Created by nnUNet
-- Mask: a separate image that defines which pixels belong to specific classes (or labels). Masks can be binary if only background and foregound are of intestest or grayscale for multiclass segmentation 
+- Mask: a separate image that defines which pixels belong to specific classes (or labels). Masks can be binary if only background and foregound are of intestest or grayscale for multiclass segmentation. Essentially, an annotation file is also a mask and both words can be used interchangeably in this documentation.  
     
 # Workflow
 Our workflow includes several crucial steps such as image annotation, conversion, preprocessing, model training, inference and analysis of the output data (Figure 1). The workflow was mainly developed in a Python environment. It uses several scripts (steps in italic font on figure 1) which create annotations and convert the images to nnUNet-friendly formats, before processing using the native nnUNet pipeline (steps in bold font on figure 1). 
@@ -141,7 +141,11 @@ ImageJ is a free, open-source image processing software widely used in scientifi
 4. Place nifti_io.jar into the plugins folder of ImageJ (at ../Fiji.app/plugins").
    
 ## 2.1.6. Setting file paths
-Open the \_\_path__.py file (from this repository) with a Text Editor and adapt the paths according to your local installations. You have to define the path to your ImageJ application as well as the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation).
+Open the \_\_path__.py file (from this repository) with a Text Editor and adapt the paths according to your local installations. You have to define the four following paths: 
+1) path to your ImageJ application, 
+2) the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation),
+3) the path to the images of your training data (input_dir_images) 
+4) the path to your annotations (input_dir_masks). 
 
 # 2.2. Data conversion
 This step takes the image and annotation files from two given folders, processes them and saves them as .nii.gz in the nnUNet_raw folder. Here, you have to keep in mind that our workflow was developed so as to work in a "folder-based" manner. 

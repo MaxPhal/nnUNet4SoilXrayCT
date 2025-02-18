@@ -11,7 +11,7 @@ import numpy as np
 from nnunetv2.dataset_conversion.generate_dataset_json import generate_dataset_json
 from tqdm import tqdm
 
-from __path__ import PATH_ImageJ, PATH_nnUNet_raw
+from __path__ import PATH_ImageJ, PATH_nnUNet_raw, input_dir_images, input_dir_masks 
 
 
 def convert_mha_to_hdr(input_dir: str, output_dir: str) -> None:
@@ -48,7 +48,6 @@ def convert_tif_to_hdr(input_dir: str, output_dir: str) -> None:
         shell=True,
     ).wait()
 
-
 def convert_hdr_to_nii(input_dir: str, is_mask: bool = False, num_classes: int = None) -> None:
     """
     Convert the .hdr/.img files to .nii.gz and save them in the same directory.
@@ -84,7 +83,6 @@ def convert_hdr_to_nii(input_dir: str, is_mask: bool = False, num_classes: int =
         os.remove(hdr_file)
         os.remove(hdr_file.replace(".hdr", ".img"))
 
-
 def get_img_file(mask_name: str, img_files: List[str], img_postfix: str) -> str:
     """
     Get the image file which corresponds to the mask_name
@@ -99,7 +97,6 @@ def get_img_file(mask_name: str, img_files: List[str], img_postfix: str) -> str:
         if name in mask_name:
             return img_files[i]
     return None
-
 
 # def img_normalize(img: np.ndarray, mean: float, std: float) -> np.ndarray:
 def img_normalize(img: np.ndarray, norm_type) -> np.ndarray:
@@ -123,7 +120,6 @@ def img_normalize(img: np.ndarray, norm_type) -> np.ndarray:
     else:
         raise NotImplementedError(f"Unknown normalization type: {norm_type}")
 
-
 def mask_to_nnUNet(mask_data: np.ndarray, num_classes: int) -> np.ndarray:
     """
     Convert the mask into the nnUNet Format
@@ -141,12 +137,11 @@ def mask_to_nnUNet(mask_data: np.ndarray, num_classes: int) -> np.ndarray:
     mask_data -= 1
     return mask_data
 
-
 if __name__ == "__main__":
     """
     PARAMETERS NEEDED TO BE MANUALLY ADOPTED FOR EACH DATASET
-    :param input_dir_images: Path to the folder which contains the images in the .mha file format
-    :param input_dir_masks: Path to the folder which contains the annotations in the .mha file format
+    :param input_dir_images: Path to the folder which contains the images in the .tif file format -- this is now read from the __path__ file
+    :param input_dir_masks: Path to the folder which contains the annotations in the .tif file format -- this is now read from the __path__ file
         Requirements:
         - label 0 are the voxels which are not annotated and should be ignored
         - label 1 should be the soil matrix
@@ -159,14 +154,6 @@ if __name__ == "__main__":
         to be removed which is "_norm" is this case. If image and annotations are the same this can
         also be empty ("").
     """
-    # Ubuntu
-    # input_dir_images = ("/home/l727r/Desktop/UFZ_2022_CTPoreRootSegmentation/ufz_2023_conversion_test/raw/images")
-    # input_dir_masks = "/home/l727r/Desktop/UFZ_2022_CTPoreRootSegmentation/ufz_2023_conversion_test/raw/annotations"
-    
-    # Windows
-    input_dir_images = r"F:\phalempin\grayscale_data\dataset3_icecores\training_gray"
-    input_dir_masks = r"F:\phalempin\annotations\dataset3_icecores\third_round"
-
     DatasetName = "Ice_cores_3rdround"
     TaskID = 304
     Classes = [
@@ -207,7 +194,7 @@ if __name__ == "__main__":
     """
     Step2: Convert image files from .tif to .nii.gz 
     """
-    #convert_mha_to_hdr(input_dir_images, temp_img_folder) # uncomment if input grayscale data are in .mha format
+    #convert_mha_to_hdr(input_dir_images, temp_img_folder) # uncomment if input grayscale data are in .mha format and commment the next line 
     convert_tif_to_hdr(input_dir_images, temp_img_folder) 
     convert_hdr_to_nii(temp_img_folder)
     """
