@@ -154,14 +154,17 @@ if __name__ == "__main__":
         to be removed which is "_norm" is this case. If image and annotations are the same this can
         also be empty ("").
     """
-    DatasetName = "Ice_cores_3rdround"
-    TaskID = 304
-    Classes = [
-        "pores",
-        "mineral",
-        "ice",
-        "POM",
-    ]
+    DatasetName = "GCEF_dataset" # Name of the Dataset
+    TaskID = 777 # ID of the Dataset
+    Classes = ["matrix", 
+               "wall", 
+               "rocks", 
+               "fresh_roots", 
+               "degraded_roots", 
+               "POM", 
+               "root_channels", 
+               "earthworm_burrows", 
+               "pores"] # Classes identified in Dataset 1
     norm_type = "noNorm" # one of [noNorm, zscore, rescale_to_0_1, rgb_to_0_1] with default==zscore
     img_file_postfix = "" # empty if image and annotations have the same name otherwise something like: "_norm" // this works if img file has a suffixe, not if the annotations have a suffix
 
@@ -194,7 +197,7 @@ if __name__ == "__main__":
     """
     Step2: Convert image files from .tif to .nii.gz 
     """
-    #convert_mha_to_hdr(input_dir_images, temp_img_folder) # uncomment if input grayscale data are in .mha format and commment the next line 
+    #convert_mha_to_hdr(input_dir_images, temp_img_folder) # uncomment if input grayscale data are in .mha format and commment the next line
     convert_tif_to_hdr(input_dir_images, temp_img_folder) 
     convert_hdr_to_nii(temp_img_folder)
     """
