@@ -95,9 +95,11 @@ Note that the label 1 should also be set to the soil matrix. Once the classes ar
 ````
 python make_annotations.py -i </path/to/the/images/to/annotate> -o </path/to/where/annotations/will_be/saved> -id <sample_ID>
 # Example
-python make_annotations.py -i C:\Users\phalempi\Desktop\scans -o C:\Users\phalempi\Desktop\annotations -id SPP_P21_SPE_UC193
+python make_annotations.py -i C:\Users\phalempi\Desktop\images -o C:\Users\phalempi\Desktop\annotations -id SPP_P21_SPE_UC193
 ````
-Just a few moment after launching the script, the image name and shape will be printed in the terminal. Afterwards, the GUI of Napari pops up and displays the middle slice of the loaded image. On that middle slice, the soil matrix appears in color (115,  0, 102) (RGB). To get familiar with the GUI of Napari, we recommend to consult external resources. There are some very good explanatory videos out there (for instance on YouTube) that show how to efficiently annotate images with Napari. Because a short video is more impactful than a those words, we won´t go over the procedure in this repository. Once you are done annotating your images, just close the Napari GUI and the annotated images will be automatically saved under the path you have given after the flag -o. Before going further with data preparation, make sure to deactivate the current virtual environment.
+Just a few moment after launching the script, the image name and shape will be printed in the terminal. Afterwards, the GUI of Napari pops up and displays the middle slice of the loaded image. On that middle slice, the soil matrix appears in color (115,  0, 102) (RGB). To get familiar with the GUI of Napari, we recommend to consult external resources. There are some very good explanatory videos out there (for instance on YouTube) that show how to efficiently annotate images with Napari. Because a short video is more impactful than a those words, we won´t go over the procedure in this repository. Note that with the current version of nnUNet at least five annotations are needed. In all cases, we recommend not using than five annotations.
+
+Once you are done annotating your images, just close the Napari GUI and the annotated images will be automatically saved under the path you have given after the flag -o. Before going further with data preparation, make sure to deactivate the current virtual environment.
 ````
 mamba deactivate
 ````
@@ -142,18 +144,16 @@ ImageJ is a free, open-source image processing software widely used in scientifi
    
 ## 2.1.6. Setting file paths
 Open the \_\_path__.py file (from this repository) with a Text Editor and adapt the paths according to your local installations. You have to define the four following paths: 
-1) path to your ImageJ application, 
-2) the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation),
-3) the path to the images of your training data (input_dir_images) 
-4) the path to your annotations (input_dir_masks). 
+1) path to your ImageJ application
+2) the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation)
+3) the path to the images of your training data (input_dir_images) # IMPORTANT: images should be in 3D stack .tif format
+4) the path to your annotations (input_dir_masks) # IMPORTANT: annotations should already be in 3D stack .tif format if you used `make_annotations.py` to generate the annotations
 
 # 2.2. Data conversion
 This step takes the image and annotation files from two given folders, processes them and saves them as .nii.gz in the nnUNet_raw folder. Here, you have to keep in mind that our workflow was developed so as to work in a "folder-based" manner. 
 This means that all images should be in one folder and all annotations should be in another one. Data conversion entails converting the input files to .nii.gz, handling the ignore label in the annotations, cropping image and annotation to the relevant parts, normalizing the image crops and putting everything into the nnUNet format (adhering to nnUNets naming conventions of folders and files and creating a dataset.json). For each new dataset, you have to adapt the following hyperparameters in `preprocessing_nnUNet_train.py` (starting in line 133). Some examples and additional explanations are given in the `preprocessing_nnUNet_train.py` script.
 
 ```python
-input_dir_images = "" # Path to the Images
-input_dir_masks = ""# Path to the Annotations
 DatasetName = ""# Some Name
 TaskID = 555 # A Unique ID 
 Classes = ["A","B",...] # List of names for each class in the correct order
@@ -233,20 +233,8 @@ The content of nnUNet_preprocessed is used during training.
 If preprocessing and training are done on different devices you have to sync the nnUNet_preprocessed folder to the device on which you want to train. nnUNet is trained using 5-fold cross-validation. 
 This means you have to run a separate training for each fold and each fold creates a classifier file (the checkpoints_best.pth file which contains the weights of the model). The TaskID parameter is again the one you defined in the first step.
 
-````shell
-nnUNetv2_train <TaskID> 3d_fullres <fold> -tr nnUNetTrainer_betterIgnoreSampling
 
-nnUNetv2_train 555 3d_fullres 0 -tr nnUNetTrainer_betterIgnoreSampling
-nnUNetv2_train 555 3d_fullres 1 -tr nnUNetTrainer_betterIgnoreSampling
-nnUNetv2_train 555 3d_fullres 2 -tr nnUNetTrainer_betterIgnoreSampling
-nnUNetv2_train 555 3d_fullres 3 -tr nnUNetTrainer_betterIgnoreSampling
-nnUNetv2_train 555 3d_fullres 4 -tr nnUNetTrainer_betterIgnoreSampling
-````
-Note that during training, checkpoints are automatically created after 50 epochs. To resume training from a previously created checkpoint, the following command can be used.
 
-````shell
-nnUNetv2_train <TaskID> 3d_fullres <fold> -tr nnUNetTrainer_betterIgnoreSampling --c
-````
 
 # 4. Inference
 When the five training folds are completed we can use the model to make predictions.
@@ -305,7 +293,7 @@ Copy then the following lines of codes within the shell file
 ````shell
 #!/bin/bash
 
-#SBATCH --job-name=nnunet_tr_fold0  # jobname
+#SBATCH --job-name=nnunet_training  # jobname
 #SBATCH --chdir=/work/username      # sets the working directory 
 #SBATCH --output=/work/%u/%x-%j.log # give name and filepath for the .log file (console output)
 #SBATCH --time=1080                 # time requested for the job (in minutes)
@@ -326,16 +314,16 @@ export nnUNet_results="/work/phalempi/nnUNet_results"
 export nnUNet_n_proc_DA=28 # the faster the GPU, the higher the value
 
 ## run nnUNet training command (see section 2.3)
-nnUNetv2_train 444 3d_fullres 0 -tr nnUNetTrainer_betterIgnoreSampling
+nnUNetv2_train 444 3d_fullres $SLURM_ARRAY_TASK_ID -tr nnUNetTrainer_betterIgnoreSampling
 ````
 Then submit the shell script as a sequential job using the following command. 
 
 ````shell
-sbatch submit_nnunet_tr_fold0.sh 
+sbatch -a 0-4 submit_nnunet_training.sh 
 ````
-You can repeat the operations and create several shell scripts (i.e. one for each training fold) and submit each job one after the other. Depending on the resources currently available, the SLURM system will distribute each training fold to a GPU, so that all the five training will run simultaneously. 
+Depending on the resources currently available, the SLURM system will distribute each training fold to a GPU, so that all the five training will run simultaneously. 
 
-Please consider the following when requesting resources on the EVE cluster. One of the most important resource at EVE is the maximum runtime of jobs. It specifies a limit which a running job may not exceed. If the job exceeds the requested time, it will be killed automatically by the scheduler. The same applies for the requested memory per cpu. It is a good practice to optimize these parameters to avoid exceeding the job requirements, but to keep them as low as possible so that the scheduler grants resources quicker. Note also that GPU Nodes only have a maximum of 470GB RAM available. This means that the total amount of RAM (calculated as cpus-per-task * mem-per-cpu) has to be inferior to 470GB. 
+Please consider the following when requesting resources on your cluster. One of the most important resource at EVE is the maximum runtime of jobs. It specifies a limit which a running job may not exceed. If the job exceeds the requested time, it will be killed automatically by the scheduler. The same applies for the requested memory per cpu. It is a good practice to optimize these parameters to avoid exceeding the job requirements, but to keep them as low as possible so that the scheduler grants resources quicker. Note also that GPU Nodes only have a maximum of 470GB RAM available. This means that the total amount of RAM (calculated as cpus-per-task * mem-per-cpu) has to be inferior to 470GB. 
 
 ## 3.7. Preparing of array jobs for the predictions
 In order to run the predictions in a parallelized fashion on the EVE cluster, each image has to be placed in its specific folder. The reason is that nnUNet functions in a folder based manner, i.e., it predicts all the images present in given folder. However, if all the images to be predicted were in the same folder, the memory and time requirements would be huge, and the scheduler would not allocate resouces to the job. By putting one image in a single folder, the memory and time requirements are low and the images can be distributed across all nodes hosting GPUs. To spare you the effort of moving each image into an individual folders, we have created a shell script that does the job for you. The shell script takes two arguments: (1) the input folder containing the images to be predicted and (2) the directory path where the folders will each individual folders will be created. Those arguments are given after the flags -i and -o, respectively. You can then run the shell script with the following command. 
@@ -393,16 +381,16 @@ sacct
 To see all available commands related to job monitoring, consult the following [link](https://wiki.ufz.de/eve/index.php/Job_Monitoring_SLURM).Additionnaly, you can track the GPU activity over time with [Grafana](https://grafana.web-intern.app.ufz.de) dashboard.
 
 # Comments
-
-- **Class IDs**: In your Annotations class id 0 has the meaning of not beeing annotated. 
-In the prediction this is not needed since we have dense predictions, this means each class id is reduced by 1 (class id annotation == class id prediction +1)
-- **Number of Annotations:** With the current setup at least 5 annotations are needed (basic behaviour of nnUNet). 
-You can also train with fewer annotations but this need some additional adaptation.
-I recommend to not use less than 5 annotations but if you think the scenario will occur let us know and we can adopt the scripts (only minor changes, no worry).
 - **Runtime reduction:** There is some tradeoff between runtime and performance, the current setup aims for getting the best result. 
 If you want to reduce the runtime, there are different ways to archive this, but with the downside of loosing some performance.
 Again, just let us know if you want same changes here.
 
+- **Format of input images:** There is the possibility to start with grayscale images in .mha format. 
+- **Checkpoints during training:** Note that during training, checkpoints are automatically created after 50 epochs. If for whatever reasons a training fold killed by your scheduler, you can resume training from a previously created checkpoint. Therefore, the following command can be used.
+
+````shell
+nnUNetv2_train <TaskID> 3d_fullres <fold> -tr nnUNetTrainer_betterIgnoreSampling --c
+````
 # Acknowledgements
 Part of this work was funded by Helmholtz Imaging (HI), a platform of the Helmholtz Incubator. 
 

@@ -5,7 +5,7 @@ import napari
 import argparse
 
 # Create the ArgumentParser object
-parser = argparse.ArgumentParser(description='Script to demonstrate argument parsing.')
+parser = argparse.ArgumentParser(description='Argument parsing')
 
 # Define command-line arguments
 parser.add_argument('-i', type=str, required=True, help='Path to the input file')
