@@ -44,7 +44,7 @@ def convert_tif_to_hdr(input_dir: str, output_dir: str) -> None:
     print("Process .tif to .hdr")
     subprocess.Popen(
         rf'{PATH_ImageJ} --headless -macro convert_tif_to_img "{input_dir}--{output_dir}"',
-        # fr'{PATH_ImageJ} -macro convert_mha_to_img "{input_dir}--{output_dir}"', # it helps to put it in macro mode to debug
+        #fr'{PATH_ImageJ} -macro convert_mha_to_img "{input_dir}--{output_dir}"', # it helps to put it in macro mode to debug
         shell=True,
     ).wait()
 
