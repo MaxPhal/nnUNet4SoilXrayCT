@@ -42,7 +42,7 @@ annotations[middle_index] = binary_middle_slice
 
 # Load the JSON file
 cwd = os.getcwd()
-with open(cwd + '/metadata.json', "r") as metadata_json_file:
+with open(cwd + '/dataset_info.json', "r") as metadata_json_file:
     metadata = json.load(metadata_json_file)
 
 # Extract label names

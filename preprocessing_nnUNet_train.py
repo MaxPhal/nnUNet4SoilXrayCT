@@ -16,7 +16,7 @@ from __path__ import PATH_ImageJ, PATH_nnUNet_raw, input_dir_images, input_dir_m
 
 # Load the JSON file with metadata
 cwd = os.getcwd()
-with open(cwd + '/metadata.json', "r") as metadata_json_file:
+with open(cwd + '/dataset_info.json', "r") as metadata_json_file:
     metadata = json.load(metadata_json_file)
 
 def convert_mha_to_hdr(input_dir: str, output_dir: str) -> None:
@@ -163,9 +163,9 @@ if __name__ == "__main__":
     # Extract metadata information from .json file
     TaskID = metadata["TaskID"]
     DatasetName  = metadata["DatasetName"]
-    label_names = metadata["label_names"]
+    label_names = metadata["labels"]
     Classes = list(label_names.values())
-    del Classes[0] # remove the first class which is the background
+    del Classes[0] # remove the first class which is the "ToPredict" class  
     norm_type = metadata["norm_type"] # this is the normalization type
     img_file_postfix = "" # empty if image and annotations have the same name otherwise something like: "_norm" // this works if img file has a suffixe, not if the annotations have a suffix
 
@@ -244,8 +244,7 @@ if __name__ == "__main__":
         img = nib.load(img_file)
         img_data = img.get_fdata()
 
-        # mean, std = img_data.mean(), img_data.std()
-        img_data = img_data[:, :, z_min:z_max] # this was commented in the downloaded script! It is needs to be uncommented so that cropping occurs for the grayscale also so that dimensions match
+        img_data = img_data[:, :, z_min:z_max] # crop the image to annotations
         img_data = img_normalize(img_data, norm_type)
 
         nib.save(

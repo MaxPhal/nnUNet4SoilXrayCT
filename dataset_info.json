@@ -1,6 +1,6 @@
-{   "TaskID": ["777"], 
-    "DatasetName": ["GCEF"], 
-    "norm_type": ["zscore"], 
+{   "TaskID": 777, 
+    "DatasetName": "GCEF", 
+    "norm_type": "noNorm", 
     "labels": { 
         "0": "ToPredict",
         "1": "Matrix",
