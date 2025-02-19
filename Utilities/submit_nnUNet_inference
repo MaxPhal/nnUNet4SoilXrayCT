@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#SBATCH --job-name=nnunet_prediction
+#SBATCH --chdir=/work/phalempi
+#SBATCH --output=/work/%u/%x-%A-%a.log
+#SBATCH --time=45
+#SBATCH --mem-per-cpu=60G
+#SBATCH --mail-type=BEGIN,END
+#SBATCH -G nvidia-a100:1
+
+##  activating  the virtual environment
+source  /home/phalempi/MPvenv/bin/activate 
+## declaring the environment variable
+export nnUNet_results="/work/phalempi/nnUNet_results"
+
+# Retrieving the name of each sample, storing it in a list and using the array job submission to submit all jobs at once
+# Define the folder path
+folder_path_in="/work/phalempi/grayscale_data"
+folder_path_out="/work/phalempi/predictions"
+
+# Initialize an empty list
+file_list=()
+
+# Loop through all files in the folder and add them to the list
+for file in "$folder_path_in"/*; do
+    # Check if it's a file (not a directory)
+    if [ -d "$file" ]; then
+        file_list+=("$(basename "$file")")
+    fi
+done
+
+## Run inference with nnUNet native command
+nnUNetv2_predict -i "$folder_path_in"/"${file_list[$SLURM_ARRAY_TASK_ID]}" -o "$folder_path_out" -d 444 -tr nnUNetTrainer_betterIgnoreSampling -c 3d_fullres
