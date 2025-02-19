@@ -165,7 +165,7 @@ if __name__ == "__main__":
                "root_channels", 
                "earthworm_burrows", 
                "pores"] # Classes identified in Dataset 1
-    norm_type = "noNorm" # one of [noNorm, zscore, rescale_to_0_1, rgb_to_0_1] with default==zscore
+    norm_type = "zscore" # one of [noNorm, zscore, rescale_to_0_1, rgb_to_0_1] with default==zscore
     img_file_postfix = "" # empty if image and annotations have the same name otherwise something like: "_norm" // this works if img file has a suffixe, not if the annotations have a suffix
 
     """
