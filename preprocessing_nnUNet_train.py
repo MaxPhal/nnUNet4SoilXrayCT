@@ -165,7 +165,8 @@ if __name__ == "__main__":
     DatasetName  = metadata["DatasetName"]
     label_names = metadata["label_names"]
     Classes = list(label_names.values())
-    norm_type = metadata["norm_type"] # this is the normalization type, it is the same as the label names
+    del Classes[0] # remove the first class which is the background
+    norm_type = metadata["norm_type"] # this is the normalization type
     img_file_postfix = "" # empty if image and annotations have the same name otherwise something like: "_norm" // this works if img file has a suffixe, not if the annotations have a suffix
 
     """
