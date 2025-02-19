@@ -1,5 +1,6 @@
 {   "TaskID": ["777"], 
     "DatasetName": ["GCEF"], 
+    "norm_type": ["zscore"], 
     "labels": { 
         "0": "ToPredict",
         "1": "Matrix",

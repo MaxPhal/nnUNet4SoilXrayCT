@@ -1,6 +1,7 @@
 import glob
 import os
 import shutil
+import json
 import subprocess
 from os.path import join, split
 from pathlib import Path
@@ -13,6 +14,10 @@ from tqdm import tqdm
 
 from __path__ import PATH_ImageJ, PATH_nnUNet_raw, input_dir_images, input_dir_masks 
 
+# Load the JSON file with metadata
+cwd = os.getcwd()
+with open(cwd + '/metadata.json', "r") as metadata_json_file:
+    metadata = json.load(metadata_json_file)
 
 def convert_mha_to_hdr(input_dir: str, output_dir: str) -> None:
     """
@@ -154,18 +159,13 @@ if __name__ == "__main__":
         to be removed which is "_norm" is this case. If image and annotations are the same this can
         also be empty ("").
     """
-    DatasetName = "GCEF_dataset" # Name of the Dataset
-    TaskID = 777 # ID of the Dataset
-    Classes = ["matrix", 
-               "wall", 
-               "rocks", 
-               "fresh_roots", 
-               "degraded_roots", 
-               "POM", 
-               "root_channels", 
-               "earthworm_burrows", 
-               "pores"] # Classes identified in Dataset 1
-    norm_type = "zscore" # one of [noNorm, zscore, rescale_to_0_1, rgb_to_0_1] with default==zscore
+
+    # Extract metadata information from .json file
+    TaskID = metadata["TaskID"]
+    DatasetName  = metadata["DatasetName"]
+    label_names = metadata["label_names"]
+    Classes = list(label_names.values())
+    norm_type = metadata["norm_type"] # this is the normalization type, it is the same as the label names
     img_file_postfix = "" # empty if image and annotations have the same name otherwise something like: "_norm" // this works if img file has a suffixe, not if the annotations have a suffix
 
     """

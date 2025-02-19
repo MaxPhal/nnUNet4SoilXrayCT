@@ -42,20 +42,17 @@ annotations[middle_index] = binary_middle_slice
 
 # Load the JSON file
 cwd = os.getcwd()
-with open(cwd + '/metadata.json', "r") as json_file:
-    data = json.load(json_file)
+with open(cwd + '/metadata.json', "r") as metadata_json_file:
+    metadata = json.load(metadata_json_file)
 
 # Extract label names
-label_names = data["labels"]
+label_names = metadata["labels"]
 
 # Extract color dictionary (convert keys back to integers)
-color_dict = {int(k): tuple(v) for k, v in data["colors"].items()}
+color_dict = {int(k): tuple(v) for k, v in metadata["colors"].items()}
 
 # Normalize the RGB values for Napari (values must be between 0 and 1)
 normalized_color_dict = {k: (np.array(v) / 255) for k, v in color_dict.items()}
-
-# Create properties dictionary for label names
-properties = {'index': list(label_names.keys()), 'name': list(label_names.values())}
 
 # Launch Napapi 
 viewer = napari.Viewer()
@@ -64,14 +61,9 @@ viewer.add_image(grayscale_data, name='Grayscale data')
 # Add label layer with properties
 label_layer = viewer.add_labels(annotations, 
                                 name="Annotations", 
-                                properties=properties, 
                                 color=normalized_color_dict, 
                                 opacity=1,
                                 blending='additive')
-
-# Assign label names explicitly
-label_layer.metadata['label_names'] = label_names  # Store for later use
-
 napari.run()
 
 # Save annotations as 3D .tif 8-bit format (values between 0-255)
