@@ -3,6 +3,8 @@ import tifffile as tiff
 from skimage.filters import threshold_otsu
 import napari
 import argparse
+import json
+import os 
 
 # Create the ArgumentParser object
 parser = argparse.ArgumentParser(description='Argument parsing')
@@ -27,8 +29,9 @@ print(f"Image shape: {grayscale_data.shape}")
 middle_index = (grayscale_data.shape[0] // 2)-1
 middle_slice = grayscale_data[middle_index]
 
-# Apply Otsu thresholding
+# Calculate Otsu threshold on the whole subvolume
 otsu_thresh = threshold_otsu(grayscale_data)
+# Apply Otsu thresholding
 binary_middle_slice = ((middle_slice < 220) & (middle_slice > otsu_thresh)).astype(np.uint8)
 
 # Create an empty 3D stack of zeros
@@ -37,33 +40,16 @@ annotations = np.zeros_like(grayscale_data, dtype=np.uint8)
 # Insert the binary middle slice into the correct position
 annotations[middle_index] = binary_middle_slice
 
-# Name labels 
-label_names = {
-    0: "ToPredict",
-    1: "Matrix",
-    2: "Wall",
-    3: "Rocks",
-    4: "FreshRoots",
-    5: "DegradingRoots",
-    6: "otherPOM",
-    7: "RootChannels",
-    8: "EarthwormBurrows",
-    9: "otherPores",
-}
+# Load the JSON file
+cwd = os.getcwd()
+with open(cwd + '/metadata.json', "r") as json_file:
+    data = json.load(json_file)
 
-# Define a colormap for labels
-color_dict = {
-    0: (  0,  0,   0),  # ToPredict
-    1: (115,  0, 102),  # Matrix
-    2: ( 51, 51,  51),  # Wall
-    3: (255,255,   0),  # Rocks
-    4: (204,  0,   0),  # FreshRoots
-    5: (255,153,  51),  # DegradingRoots
-    6: (204,255, 255),  # otherPOM
-    7: ( 11,  0, 255),  # RootChannels
-    8: ( 51,204,   0),  # EarthwormBurrows
-    9: (  0,122, 153),  # otherPores
-}
+# Extract label names
+label_names = data["labels"]
+
+# Extract color dictionary (convert keys back to integers)
+color_dict = {int(k): tuple(v) for k, v in data["colors"].items()}
 
 # Normalize the RGB values for Napari (values must be between 0 and 1)
 normalized_color_dict = {k: (np.array(v) / 255) for k, v in color_dict.items()}
