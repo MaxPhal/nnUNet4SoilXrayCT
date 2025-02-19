@@ -1,0 +1,27 @@
+{   "TaskID": ["777"], 
+    "DatasetName": ["GCEF"], 
+    "labels": { 
+        "0": "ToPredict",
+        "1": "Matrix",
+        "2": "Wall",
+        "3": "Rocks",
+        "4": "FreshRoots",
+        "5": "DegradingRoots",
+        "6": "otherPOM",
+        "7": "RootChannels",
+        "8": "EarthwormBurrows",
+        "9": "otherPores"
+    },
+    "colors": { 
+        "0": [0, 0, 0],
+        "1": [115, 0, 102],
+        "2": [51, 51, 51],
+        "3": [255, 255, 0],
+        "4": [204, 0, 0],
+        "5": [255, 153, 51],
+        "6": [204, 255, 255],
+        "7": [11, 0, 255],
+        "8": [51, 204, 0],
+        "9": [0, 122, 153]
+    }
+}

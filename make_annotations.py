@@ -28,8 +28,8 @@ middle_index = (grayscale_data.shape[0] // 2)-1
 middle_slice = grayscale_data[middle_index]
 
 # Apply Otsu thresholding
-otsu_thresh = threshold_otsu(middle_slice)
-binary_middle_slice = (middle_slice > otsu_thresh).astype(np.uint8)  # Convert to binary (0 and 1)
+otsu_thresh = threshold_otsu(grayscale_data)
+binary_middle_slice = ((middle_slice < 220) & (middle_slice > otsu_thresh)).astype(np.uint8)
 
 # Create an empty 3D stack of zeros
 annotations = np.zeros_like(grayscale_data, dtype=np.uint8)

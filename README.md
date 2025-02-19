@@ -15,6 +15,8 @@ Phalempin, M., Krämer, L., Geers-Lucas, M., Isensee, F., & Schlüter, S. (2024)
 # Philosopy
 The codes presented here and this repository were written asumming (almost) no prerequisite programming experience of the user. Together, we will go in detail into many aspects of image processing, from installing plugins to tapping into the resources of high performance computing (HPC)cluster. We aimed write codes which are flexible so that only file paths have to be adjusted by you. In many cases, these filepaths are given from the terminal (with so called "flags") so that you won´t even have to edit the scripts. In only a few occasions you will have to actually modifiy hyperparameters within a script. 
 
+<!-- we are aware that fluidity could have been improved, but we did not want to change the core pipepine of nnUNet-->
+
 We hope that this philosophy of programming will help get many X-ray CT enthousiasts onto the deep learning boat. We also hope you will find this repository helpful and we wish you a lot of fun working with nnUNet :). Feel free to contact us if you want to share your experience using nnUNet on your X-ray CT images of soil samples.
 
 # Nomenclature
@@ -69,7 +71,7 @@ For image annotation, we developed a strategy that minimizes annotation efforts 
 
 To do so in a semi-automatic manner, we created the `make_annotations.py` script. Before launching this script in your Miniforge terminal, make sure to adapt the lines 60 to 86 according to the classes that you want to segment. Below, we show the class definition that we used for the Dataset 1 (see our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1) for more information).
 
-````
+````python
 label_names = {
     0: "ToPredict",
     1: "SoilMatrix",
@@ -196,9 +198,9 @@ nnUNetv2_plan_and_preprocess -d 777 -c 3d_fullres -np 4 -npfp 4
 ```
 The TaskID parameter has to be the one you defined in the previous step. The -np and -npfp parameters define how many processes are used during the preprocessing.  A higher number means the preprocessing is faster but more RAM is consumed and with lower numbers less RAM is needed but the processing will take longer. You can play around with this parameter, for us 4 worked well. Now that your data abides to the nnUNet format and are preprocessed, the training process can start.
 
-# 3. Training
-# 3.1. A few words on computation on HPC Clusters
-Before we get into the training procedure, let´s briefly describe what are HPC Clustersto put everyone on the same level. An HPC cluster is a system made up of multiple interconnected computers (often called nodes) that work together to perform complex computations. These clusters are designed to handle tasks that require a large amount of computational power, such as scientific simulations, data analysis, machine learning, or rendering. Most HPC clusters run on Linux due to its stability, scalability, and open-source nature. HPC clusters typically use a job scheduler (like SLURM) to allocate resources and manage the execution of computational tasks across the nodes. For the rest of this example, we will assume that you also dispose of a cluster running on Linux with a SLURM job scheduler (this is actually the case for many of the HPC out there...).
+# 3. High Performance Computer cluster
+# 3.1 Introduction
+Before we get into the training procedure, let´s briefly describe what are HPC Clusters to put everyone on the same level. An HPC cluster is a system made up of multiple interconnected computers (often called nodes) that work together to perform complex computations. These clusters are designed to handle tasks that require a large amount of computational power, such as scientific simulations, data analysis, machine learning, or rendering. Most HPC clusters run on Linux due to its stability, scalability, and open-source nature. HPC clusters typically use a job scheduler (like SLURM) to allocate resources and manage the execution of computational tasks across the nodes. For the rest of this example, we will assume that you also dispose of a cluster running on Linux with a SLURM job scheduler (this is actually the case for many of the HPC out there...).
 
 # 3.2. Connecting to your HPC Cluster
 How you connect to your HPC Cluster is mostly gonna dependent on the infrastructure and software available in your university or research institution. At the UFZ, we have prefered to use softwares with GUIs, althought we are aware that SSH connection is usually more convenient. For this, we have used FileZilla to transfer local files (i.e., the files on your workstation) to remote locations (i.e., folders on the HPC). We have also used X2GO client to connect to the head node of the cluster and send jobs across the cluster. We recommend that you contact your IT administrator to figure out what is the easiest solution for you. In the following, we will assume that got these steps right and that you could successfully connect to your HPC Cluster.
@@ -208,13 +210,13 @@ There are several locations on which data can be stored on a HPC cluster. The ap
 
 Note that not all HPC clusters have exactly the same directory structure and nomenclature, but many follow a similar convention like the aforementionned one. Here again, contact your IT administrator to find out the best data storage options for your data. 
 
-# 3.3. Requesting resources from your HPC Cluster
+# 3.4. Requesting resources from your HPC Cluster
 Please consider the following when requesting resources on your cluster. One of the most important resource at EVE is the maximum runtime of jobs. It specifies a limit which a running job may not exceed. If the job exceeds the requested time, it will be killed automatically by the scheduler. The same applies for the requested memory per cpu. It is a good practice to optimize these parameters to avoid exceeding the job requirements, but to keep them as low as possible so that the scheduler grants resources quicker. 
 
 <!-- FOR UFZ Users: Note also that GPU Nodes only have a maximum of 470GB RAM available. This means that the total amount of RAM (calculated as cpus-per-task * mem-per-cpu) has to be inferior to 470GB -->  
 
-# 3.3. Setting up your HPC Cluster
-## 3.3.1. Setting  up a virtual environment
+# 3.5. Setting up your HPC Cluster
+## 3.5.1. Setting  up a virtual environment
 Because we are now physically using another computer (the cluster), we have to create (again) a new virtual environment for nnUNet. Since the cluster runs on Linux OS, the commmands to create virtual environment slightly differ. Here is an example:
 
 ````shell
@@ -227,24 +229,24 @@ Then activate the virtual environment with the following command:
 source /home/username/venv/bin/activate
 ````
 
-## 3.3.2. Install PyTorch
+## 3.5.2. Install PyTorch
 Once your virtual environment is created, you can now install PyTorch. PyTorch is an open-source machine learning library for Python, widely used for deep learning and artificial intelligence. It provides flexible tools for building, training, and deploying neural networks, with strong support for GPUs and dynamic computation graphs. To install PyTorch, enter the following command: 
 ````
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
 ````
 Note that, here, we install an older PyTorch version (compatible with the CUDA platform 11.7). More recent versions of CUDA are currently available, however we have not yet tried them.
 
-## 3.3.3. Install nnUNet
+## 3.5.3. Install nnUNet
 To install nnUNet, please repeat the operation described at the section 2.1.3. 
 
-## 3.3.4. Moving your files to the HPC cluster
+## 3.5.4. Moving your files to the HPC cluster
 After preprocessing, the nnUNet_preprocessed folder can be moved to the /data/bosys-nnunet directory.
 
-# 3.4. Creation of classifiers
+# 4. Training
 This step trains nnUNet with the data from nnUNet_preprocessed and saves the models, logs and checkpoints in the folder "nnUNet_results".
 The content of nnUNet_preprocessed is used during training. If preprocessing and training are done on different devices you have to sync the nnUNet_preprocessed folder to the device on which you want to train. nnUNet is trained using 5-fold cross-validation. This means you have to run a separate training for each fold and each fold creates a classifier file (the checkpoints_best.pth file which contains the weights of the model). 
 
-To run the training on the your cluster, open the file `submit_nnunet_training.sh` with a text editor (e.g., gedit) and modify some parameters according to your set-up.
+To run the training on the cluster, open the file `submit_nnunet_training.sh` with a text editor (e.g., gedit) and modify some parameters according to your set-up.
 
 ````shell
 gedit submit_nnunet_training.sh 
@@ -271,7 +273,7 @@ export nnUNet_preprocessed="/data/bosys-nnunet/nnUNet_preprocessed"
 export nnUNet_results="/work/phalempi/nnUNet_results" 
 
 ## run nnUNet training command (see section 2.3)
-nnUNetv2_train 444 3d_fullres $SLURM_ARRAY_TASK_ID -tr nnUNetTrainer_betterIgnoreSampling
+nnUNetv2_train 777 3d_fullres $SLURM_ARRAY_TASK_ID -tr nnUNetTrainer_betterIgnoreSampling
 ````
 Then submit the shell script as an array job using the following command. 
 
@@ -280,8 +282,8 @@ sbatch -a 0-4 submit_nnunet_training.sh
 ````
 Depending on the resources currently available, the SLURM system will distribute each training fold (fold 0, 1, 2, 3 and 4) to a node hosting a GPU, so that all the five training folds will run simultaneously. The results of the training procedure will be written in the nnUNet_results folder. When the five training folds are completed we can use the model to make predictions.
 
-# 4. Inference
-# 4.1. Preprocessing of the images to be predicted 
+# 5. Inference
+## 5.1. Preprocessing of the images to be predicted 
 This step aims to preprocess the images that you want to run the predictions on (i.e., the ones that were not selected as part of the training dataset). This preprocessing mainly entails an image normalization and a conversion from a 3D .tif stack to a format nnUNet can read, i.e., .nii.gz. To convert the images with the following command: 
 
 When images to predict are in 3D .tif format, please use: 
@@ -294,7 +296,7 @@ python preprocessing_nnUNet_predict.py -i /path/to/images_mha -o /path/to/images
 ````
 Addit
 
-# 4.2. Splitting the images
+## 5.2. Splitting the images
 We highly recommend to split the images after conversion to .nii.gz. This splitting basically isolate smaller cutouts in the z-direction of the original image. The benefits of splitting the images are two-folds: 
 1) It divides the images into smaller parts, so as to make sure that they fit onto the GPU VRAM.
 2) It allows to spread the predictions more efficiently across the GPU nodes of the cluster with array jobs. 
@@ -307,8 +309,8 @@ Here there are several things to note:
 
 2) The number of splits (given at the flag -s) has to be set by you. The appropriate value will depend on the VRAM of the GPU that you use. The resulting size of the image cutouts is given by ```splits_image_size=input_image_size/number_splits``` So far, we have had good results working with splits with values between 8 and 10, which means that the resulting image size  would usually be inferior to 500 MB. 
 
-# 4.2. Run the predictions
-## 3.7. Preparing of array jobs for the predictions
+## 5.3. Run the predictions
+### 5.3.1 Preparing of array jobs for the predictions
 In order to run the predictions in a parallelized fashion on the EVE cluster, each image has to be placed in its specific folder. The reason is that nnUNet functions in a folder based manner, i.e., it predicts all the images present in given folder. However, if all the images to be predicted were in the same folder, the memory and time requirements would be huge, and the scheduler would not allocate resouces to the job. By putting one image in a single folder, the memory and time requirements are low and the images can be distributed across all nodes hosting GPUs. To spare you the effort of moving each image into an individual folders, we have created a shell script that does the job for you. The shell script takes two arguments: (1) the input folder containing the images to be predicted and (2) the directory path where the folders will each individual folders will be created. Those arguments are given after the flags -i and -o, respectively. You can then run the shell script with the following command. 
 
 ````shell
@@ -316,7 +318,7 @@ sh mkdir_movefiles.sh -i /path/to/input/images -o /path/to/output/images
 ````
 Note that if "/path/to/output/image" does not exist, it will be created automatically. Note also that here, we do not need to submit the job to the scheduler but can simply run it with a "sh" command. After running this shell script, all images are now placed into a single individual folder and are ready to be processed.
 
-## 3.8. Running predictions with an array job
+### 5.3.2 Running predictions with an array job
 In order to run the predictions in a parallelized manner, we have to create a so-called "array job". Job arrays allow to use SLURM's ability to create multiple jobs from one script. For example, instead of having 5 submission scripts to run the same job step with different arguments, we can have one script to run the 5 job steps at once. This allows to leverage EVE´s ability to process images simulateneously (x GPUs process x images at the same time). To do so, prepare a shell script (named for instance submit_nnUnet_array_list.sh) and copy the following commands in it.
 
 ````shell
@@ -352,9 +354,8 @@ for file in "$folder_path"/*; do
 done
 
 nnUNetv2_predict -i "$folder_path"/"${file_list[$SLURM_ARRAY_TASK_ID]}" -o /work/phalempi/predictions/images_nii -d 444 -tr nnUNetTrainer_betterIgnoreSampling -c 3d_fullres
-# here the number of task id for the scheduler as an index to retrieve the name of the images to be predicted (stored in a list called file_list)
 ````
-To submit the array job, use the following command
+To submit the array job, use the following command:
 
 ````shell
 sbatch –a 0-n submit_nnUnet_array_list.sh  
@@ -364,22 +365,25 @@ where the parameters "0" and "412" are used to initiate and terminate the "for" 
 ````shell
 sacct
 ````
+## 5.4. Post-processing of the predictions 
+### 5.4.1 Ensemble the splitted Images 
 
-4. **(Optional) Ensemble the splitted Images:** Needs only be done if images got split in Step 2.
+Needs only be done if images got split in Step 2.
+
 ````shell
 python postprocessing_nnUNet_predict_ensemble.py -i <input.path.to.splitted.prediction> -o <output.path.for.ensembled.predictoin>
 # Example
 python postprocessing_nnUNet_predict_ensemble.py -i /media/l727r/data/UFZ_CTPoreRootSegmentation/HI_dataset2_grass_vs_crop/test_splitting/splitted_prediction -o /media/l727r/data/UFZ_CTPoreRootSegmentation/HI_dataset2_grass_vs_crop/test_splitting/prediction
 ````
 
-5. **Postprocessing:** Just transfer the .nii.gz files into the .mha format.
+### 5.4.2 Final file conversion
+Just transfer the .nii.gz files into the .mha format.
 ````shell
 python postprocessing_nnUNet_predict.py -i <input.path.to.nii.gz.predictions> -o <output.path.to.mha.predictions>
 # Example
 python postprocessing_nnUNet_predict.py -i /home/l727r/Desktop/UFZ_2022_CTPoreRootSegmentation/predictions_nii -o /home/l727r/Desktop/UFZ_2022_CTPoreRootSegmentation/predictions_mha
 ````
-
-
+# 6. Log analysis
 
 
 
