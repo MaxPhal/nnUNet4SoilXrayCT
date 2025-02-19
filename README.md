@@ -13,21 +13,21 @@ Phalempin, M., Krämer, L., Geers-Lucas, M., Isensee, F., & Schlüter, S. (2024)
 ````
 
 # Philosopy
-The codes presented here and this repository were written asumming (almost) no prerequisite programming experience of the user. We will go fully in detail into every aspects of image processing, from install basics to tapping into the resources of high performance computing cluster. We aimed to develop python scripts which are flexible in the sense that mainly file paths have to be adjusted by you. In many cases, these filepaths are given from the terminal (with so called "flags") so that you won´t have to open the scripts. In only a few occasions will you have to actually modifiy hyperparameters within a script. 
-We hope that this philosophy of programming will help get many X-ray CT enthousiasts onto the deep learning boat.
+The codes presented here and this repository were written asumming (almost) no prerequisite programming experience of the user. Together, we will go in detail into many aspects of image processing, from installing plugins to tapping into the resources of high performance computing (HPC)cluster. We aimed write codes which are flexible so that only file paths have to be adjusted by you. In many cases, these filepaths are given from the terminal (with so called "flags") so that you won´t even have to edit the scripts. In only a few occasions you will have to actually modifiy hyperparameters within a script. 
 
-We hope you will find this repository helpful! We wish a you a lot of fun working with nnUNet :). Feel free to contact us if you want to share your experience using nnUNet on your X-ray CT images of soil samples.
+We hope that this philosophy of programming will help get many X-ray CT enthousiasts onto the deep learning boat. We also hope you will find this repository helpful and we wish you a lot of fun working with nnUNet :). Feel free to contact us if you want to share your experience using nnUNet on your X-ray CT images of soil samples.
 
 # Nomenclature
-Before getting down to business, let´s define a few terms to avoid any confusion. 
+Before getting down to business, let´s define a few terms to avoid any potential confusion. 
 - Dataset: Collection of all images and annotation
 - Image: one single (.tif, .mha or .nii.gz) file which contains the grayscale values
 - Class: a category present in the images, e.g., for instance "roots", "soil matrix" or "biopores" 
 - Label: the specific value assigned in the segmentation mask, e.g., 1 = Roots; 2= Soil matrix; 3 = Biopores
-- Annotation: one single (.tif, .mha or .nii.gz) file which contains the labelled classes - Created by you
+- Annotation: one single (.tif, .mha or .nii.gz) file which contains the labelled classes - Created by ythe user (you!)
 - Prediction: one single (.tif, .mha or .nii.gz) file which contains the labelled classes - Created by nnUNet
-- Mask: a separate image that defines which pixels belong to specific classes (or labels). Masks can be binary if only background and foregound are of intestest or grayscale for multiclass segmentation. Essentially, an annotation file is also a mask and both words can be used interchangeably in this documentation.  
-    
+- Mask: a separate image that defines which voxels belong to specific classes (or labels). Masks can be binary if only background and foregound are of intestest or grayscale for multiclass segmentation. Essentially, an annotation file is also a mask and both words can be used interchangeably in this documentation.  
+- Image crops: refers to an image that was cropped from a bigger image (in terms of size). "Subvolumes" or "cutouts" are synonims of "image crops". 
+
 # Workflow
 Our workflow includes several crucial steps such as image annotation, conversion, preprocessing, model training, inference and analysis of the output data (Figure 1). The workflow was mainly developed in a Python environment. It uses several scripts (steps in italic font on figure 1) which create annotations and convert the images to nnUNet-friendly formats, before processing using the native nnUNet pipeline (steps in bold font on figure 1). 
 
@@ -37,20 +37,19 @@ Our workflow includes several crucial steps such as image annotation, conversion
 
 **Figure 1.** Workflow to transition from 3D X-ray CT image stacks to nnUNet predictions 
 
-Our workflow relies on the use of high performance computing (HPC) cluster to perform computionnally demanding tasks such as training and inference. We highly recommend you do the same because GPUs are so much faster than CPUs. Also, we have developed this workflow in a way that several GPUs can work in parallel on several cutouts of the same image. This feature allows increased processing speed, which makes it highly competitive, even against less demanding segmentation methods. If your university or research insitution does not offer access to a HPC cluster for scientific computation, consider relying on dedicated GPU Servers that can be rented. For processing tasks that rely on CPUs only, we recommend using on a regular workstation. To develop the workflow, we used a workstation running on Windows (64-bit, 767 GB RAM) for CPU tasks only. For GPU tasks only, we used the [EVE cluster](https://www.ufz.de/index.php?en=51499) of the UFZ. 
-
+Our workflow relies on the use of HPC cluster to perform computionnally demanding tasks such as training and inference. We highly recommend you do the same because GPUs are so much faster than CPUs. Also, we have developed this workflow in a way that several GPUs can work in parallel on several cutouts of the same image. This feature allows increased processing speed, which makes it highly competitive, even against less computationally demanding segmentation methods. If your university or research insitution does not offer access to a HPC cluster, consider relying on dedicated GPU Servers that can be rented. For processing tasks that rely on CPUs only, we recommend using on a regular workstation. To develop the workflow, we used a workstation running on Windows (64-bit, Intel(R) Xeon(R) Gold 6142 CPU and 192 GB RAM) for CPU tasks only. For GPU tasks only, we used the [EVE cluster](https://www.ufz.de/index.php?en=51499) of the UFZ. 
 
 # 1.  Groundtruth data preparation 
 # 1.1 Setting up your computer 
 ## 1.1.1 Install Miniforge 
-Miniforge is a lightweight version of Anaconda that helps you install and manage Python and other software packages efficiently. It’s designed for flexibility and supports open-source package management with Conda, making it ideal for scientific computing and data analysis. We recommend the distribution [Miniforge](https://github.com/conda-forge/miniforge#miniforge3). For ease-of-use, it is recommended to install it for your use only and to add Conda to the PATH variable during installation.
+Miniforge is a lightweight version of Anaconda that helps install and manage Python and other software packages efficiently. It’s designed for flexibility and supports open-source package management with Conda, making it ideal for scientific computing and data analysis. We recommend the distribution [Miniforge](https://github.com/conda-forge/miniforge#miniforge3). For ease-of-use, it is recommended to install it for your use only and to add Conda to the PATH variable during installation.
 
 ## 1.1.2. Create a virtual environment <!-- Successful on BOPHY116 -->
 When working with Python, we often rely on various plugins and software libraries that need to be well-organized. One effective way to manage them is by using Conda environments. A Conda environment functions like a virtual workspace or isolated system, accessible through the terminal. Software installed within one Conda environment remains separate and may not be available in others. If an environment becomes unstable—for instance, due to incompatible software—you can simply create a new one and start fresh. Please use the following command in your Miniforge terminal to create a virtual environment.
 ````
 mamba create -n venv-napari python=3.11
 ````
-Replace "venv-napari" by any name if you want to give to your virtual environment. Choose a name that is meaningful and easy to remember as you are likely to be using it often.  Make sure to activate your virtual environment before proceeding with further installations. Once the virtual environment is created, activate it with: 
+Replace "venv-napari" by any name if you want to give to your virtual environment. Choose a name that is meaningful and easy to remember as you are likely to be using it often.  Make sure to activate your virtual environment before proceeding with further installations:
 ````
 mamba activate venv-napari
 ````
@@ -61,16 +60,19 @@ mamba install devbio-napari pyqt -c conda-forge
 ````
 
 # 1.2. Image selection
-For the annotations, make sure to select slices from as many different images as possible (best case only 1 slice from a single image) and to add some annotations near the annotated slice and label underrepresented or unrepresentative classes. In the annotations, the label 0 should never be annotated as it is the class "To be predicted". We recommend to prepare image cutouts having the same x-y extent as the original but only 300 slices in the Z-direction. 
+To create representative groundthruths dataset, it is important to define classes of interests (i.e., roots, soil matrix, biopores, etc...) and to select subvolumes which contain those classes. Due to the spatial and temporal heterogeneity of constituents in soils, it is unlikely that all classes will be present within one single image. Therefore, we recommend selecting subvolumes while making sure that the classes of interests are present in the whole training datasets at least once (but they can be absent in some images). We recommend preparing image cutouts having the same x-y extent as the original but only 300 slices in the Z-direction. This allows to work with small images. Moreover, 300 slices is usually enough to capture classes of interests representatively.
+
 IMPORTANT: The selected images for groundtruth generation should be in a 3D .tif file format.  
 
 # 1.3. Image annotation
-For image annotation, we developed a strategy that minimizes annotation efforts while still ensuring that all relevant classes are captured. This strategy relies on dense annotations of one slice and on sparse annotations for interesting features within a stack (see figure 2 in our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1)). To perform dense annotations, the middle slice of the stack was segmented with Otsu thresholding and heavily annotated manually for other interesting features. To do so in a semi-automatic manner, we created the `make_annotations.py` script. Before launching this script in your Miniforge terminal, make sure to adapt the lines 60 to 86 according to the classes that you want to segment. Below, we show the class definition that we used for the Dataset 1 (see our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1) for more information).
+For image annotation, we developed a strategy that minimizes annotation efforts while still ensuring that all relevant classes are captured. This strategy relies on dense annotations of one slice and on sparse annotations for interesting classes within a stack (see figure 2 in our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1)). To perform dense annotations, the middle slice of the stack was segmented with Otsu thresholding to isolate the soil matrix and  it was heavily densely manually for other interesting classes. 
+
+To do so in a semi-automatic manner, we created the `make_annotations.py` script. Before launching this script in your Miniforge terminal, make sure to adapt the lines 60 to 86 according to the classes that you want to segment. Below, we show the class definition that we used for the Dataset 1 (see our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1) for more information).
 
 ````
 label_names = {
     0: "ToPredict",
-    1: "Matrix",
+    1: "SoilMatrix",
     2: "Wall",
     3: "Rocks",
     4: "FreshRoots",
@@ -84,7 +86,7 @@ label_names = {
 # Define a colormap for labels
 color_dict = {
     0: (  0,  0,   0),  # ToPredict
-    1: (115,  0, 102),  # Matrix
+    1: (115,  0, 102),  # SoilMatrix
     2: ( 51, 51,  51),  # Wall
     3: (255,255,   0),  # Rocks
     4: (204,  0,   0),  # FreshRoots
@@ -95,22 +97,22 @@ color_dict = {
     9: (  0,122, 153),  # otherPores
 }
 ````
-Note that the label 1 should also be set to the soil matrix. Once the classes are modified according to your dataset and the colors are defined for each label, you can launch the `make_annotations.py` script. This script takes three arguments, i.e., the input folder path (the path to the folder containing the images that you want to annotate), the output folder path (the path to the folder where the annotations will be saved) and the sample ID (the name of your image). These arguments are passed from the command terminal with the three flags "-i", "-o" and "-id" respectively.   
+Note that the label "0" should be not annotated so as it is the class "ToPredict". Also the label "1" should always be set to "SoilMatrix".  Once the classes are modified according to your dataset and the colors are defined for each label, you can launch the `make_annotations.py` script. This script takes three arguments, i.e., the input folder path (the path to the folder containing the images that you want to annotate), the output folder path (the path to the folder where the annotations will be saved) and the sample ID (the name of your image). These arguments are passed from the command terminal with the three flags "-i", "-o" and "-id", respectively.   
 ````
 python make_annotations.py -i </path/to/the/images/to/annotate> -o </path/to/where/annotations/will_be/saved> -id <sample_ID>
 # Example
 python make_annotations.py -i C:\Users\phalempi\Desktop\images -o C:\Users\phalempi\Desktop\annotations -id SPP_P21_SPE_UC193
 ````
-Just a few moment after launching the script, the image name and shape will be printed in the terminal. Afterwards, the GUI of Napari pops up and displays the middle slice of the loaded image. On that middle slice, the soil matrix appears in color (115,  0, 102) (RGB). To get familiar with the GUI of Napari, we recommend to consult external resources. There are some very good explanatory videos out there (for instance on YouTube) that show how to efficiently annotate images with Napari. Because a short video is more impactful than a those words, we won´t go over the procedure in this repository. Note that with the current version of nnUNet at least five annotations are needed. In all cases, we recommend not using than five annotations.
+Just a few moment after launching the script, the image name and shape will be printed in the terminal. Afterwards, the GUI of Napari pops up and displays the middle slice of the loaded image. On that middle slice, the soil matrix appears in color (115,  0, 102) (RGB). To get familiar with the GUI of Napari, we recommend consulting external resources. There are some very good explanatory videos out there (for instance on YouTube) that show how to efficiently annotate images with Napari. Because a short video is more impactful than thousands words, we won´t go over the procedure in this repository. Note that with the current version of nnUNet at least five annotations are needed. In all cases, we recommend not using less than five annotations.
 
-Once you are done annotating your images, just close the Napari GUI and the annotated images will be automatically saved under the path you have given after the flag -o. Before going further with data preparation, make sure to deactivate the current virtual environment.
+Once you are done annotating your images, close the Napari GUI and the annotated images will be automatically saved under the path given after the flag -o. Before going further with data preparation, make sure to deactivate the current virtual environment.
 ````
 mamba deactivate
 ````
 # 2. Data preparation 
 # 2.1. Setting up your computer 
 ## 2.1.1. Create a virtual environment <!-- Successful on BOPHY116 -->
-Unfortunately, devbio-napari can not be installed in the same virtual environment because of conflicts between version packages. This means that we are gonna need to install another virtual environment to work with nnUNet. We can create a virtual environment and activate with a single command line as follows: 
+Unfortunately, devbio-napari and nnUNet can not be installed in the same virtual environment because of conflicts between version packages. This means that we need to install another virtual environment to work with nnUNet. We can create a virtual environment and activate with a single command line as follows: 
 ````
 mamba create -n venv-nnunet python=3.11 && conda activate venv-nnunet
 ````
@@ -148,23 +150,31 @@ ImageJ is a free, open-source image processing software widely used in scientifi
    
 ## 2.1.6. Setting file paths
 Open the \_\_path__.py file (from this repository) with a Text Editor and adapt the paths according to your local installations. You have to define the four following paths: 
-1) path to your ImageJ application
+1) the path to your ImageJ application
 2) the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation)
 3) the path to the images of your training data (input_dir_images) # IMPORTANT: images should be in 3D stack .tif format
 4) the path to your annotations (input_dir_masks) # IMPORTANT: annotations should already be in 3D stack .tif format if you used `make_annotations.py` to generate the annotations
 
 # 2.2. Data conversion
 This step takes the image and annotation files from two given folders, processes them and saves them as .nii.gz in the nnUNet_raw folder. Here, you have to keep in mind that our workflow was developed so as to work in a "folder-based" manner. 
-This means that all images should be in one folder and all annotations should be in another one. Data conversion entails converting the input files to .nii.gz, handling the ignore label in the annotations, cropping image and annotation to the relevant parts, normalizing the image crops and putting everything into the nnUNet format (adhering to nnUNets naming conventions of folders and files and creating a dataset.json). For each new dataset, you have to adapt the following hyperparameters in `preprocessing_nnUNet_train.py` (starting in line 133). Some examples and additional explanations are given in the `preprocessing_nnUNet_train.py` script.
+This means that all images should be in one folder and all annotations should be in another one. Data conversion entails converting the input files to .nii.gz, handling the ignore label in the annotations, cropping image and annotation to the relevant parts, normalizing the image crops and putting everything into the nnUNet format (adhering to nnUNets naming conventions of folders and files and creating a dataset.json). For each new dataset, you have to adapt the following hyperparameters in `preprocessing_nnUNet_train.py` (starting in line 157). Some examples and additional explanations are given in the `preprocessing_nnUNet_train.py` script.
 
 ```python
-DatasetName = ""# Some Name
-TaskID = 555 # A Unique ID 
-Classes = ["A","B",...] # List of names for each class in the correct order
-norm_type= "zscore" # one of [noNorm, zscore, rescale_to_0_1, rgb_to_0_1] with default==zscore
-img_file_postfix = "" # Postfix of the image files, needed to find the corresponding annotation for each image
+    DatasetName = "GCEF" # Name of the Dataset
+    TaskID = 777 # ID of the Dataset
+    Classes = ["matrix", 
+               "wall", 
+               "rocks", 
+               "fresh_roots", 
+               "degraded_roots", 
+               "POM", 
+               "root_channels", 
+               "earthworm_burrows", 
+               "pores"] # Classes identified in Dataset 1
+    norm_type = "zscore" # one of [noNorm, zscore, rescale_to_0_1, rgb_to_0_1] with default==zscore
+    img_file_postfix = "" # empty if image and annotations have the same name otherwise something like: "_norm" 
 ```
-**Note:** You have the following options for the normalization. It is important to select the same normalization type when running preprocessing_nnUNet_predict:
+**Note:** You have the following options for image normalization:
 - *noNorm*: No normalization is done
 - *zscore*: This is the default, normalize by mean and std: ```(img - mean_) / std_```
 - *rescale_to_0_1*: rescale the values to the range of 0 and 1: ```(img-min_)/(max_-min_)```
@@ -174,7 +184,6 @@ Once you have modified the hyperparameters accordingly, you can start converting
 ````shell
 python preprocessing_nnUNet_train.py
 ````
-
 <!-- Notes for me: This step takes roughly 7 minutes for an image of 3G on BOPHY116 --> 
 
 # 2.3. Preprocessing and planing
@@ -183,20 +192,21 @@ The preprocessing and experiment planing are default steps in the native nnUNet 
 ```shell
 nnUNetv2_plan_and_preprocess -d <TaskID> -c 3d_fullres -np <num.processes> -npfp <num.processes>
 # Example
-nnUNetv2_plan_and_preprocess -d 555 -c 3d_fullres -np 4 -npfp 4
+nnUNetv2_plan_and_preprocess -d 777 -c 3d_fullres -np 4 -npfp 4
 ```
 The TaskID parameter has to be the one you defined in the previous step. The -np and -npfp parameters define how many processes are used during the preprocessing.  A higher number means the preprocessing is faster but more RAM is consumed and with lower numbers less RAM is needed but the processing will take longer. You can play around with this parameter, for us 4 worked well. Now that your data abides to the nnUNet format and are preprocessed, the training process can start.
 
-
 # 3. Training
 # 3.1. A few words on computation on HPC Clusters
-An HPC cluster is a system made up of multiple interconnected computers (often called nodes) that work together to perform complex computations. These clusters are designed to handle tasks that require a large amount of computational power, such as scientific simulations, data analysis, machine learning, or rendering. Most HPC clusters run on Linux due to its stability, scalability, and open-source nature. Linux offers better performance for parallel computing and has robust support for managing resources and running distributed applications. HPC clusters typically use a job scheduler (like Slurm) to allocate resources and manage the execution of computational tasks across the nodes. For the rest of this example, we will assume that you also dispose of a cluster running a SLURM job scheduler. 
+Before we get into the training procedure, let´s briefly describe what are HPC Clustersto put everyone on the same level. An HPC cluster is a system made up of multiple interconnected computers (often called nodes) that work together to perform complex computations. These clusters are designed to handle tasks that require a large amount of computational power, such as scientific simulations, data analysis, machine learning, or rendering. Most HPC clusters run on Linux due to its stability, scalability, and open-source nature. HPC clusters typically use a job scheduler (like SLURM) to allocate resources and manage the execution of computational tasks across the nodes. For the rest of this example, we will assume that you also dispose of a cluster running on Linux with a SLURM job scheduler (this is actually the case for many of the HPC out there...).
 
 # 3.2. Connecting to your HPC Cluster
 How you connect to your HPC Cluster is mostly gonna dependent on the infrastructure and software available in your university or research institution. At the UFZ, we have prefered to use softwares with GUIs, althought we are aware that SSH connection is usually more convenient. For this, we have used FileZilla to transfer local files (i.e., the files on your workstation) to remote locations (i.e., folders on the HPC). We have also used X2GO client to connect to the head node of the cluster and send jobs across the cluster. We recommend that you contact your IT administrator to figure out what is the easiest solution for you. In the following, we will assume that got these steps right and that you could successfully connect to your HPC Cluster.
 
-## 3.4. Storing data on your cluster
-There are several locations on which data can be stored on a HPC cluster. The appropriate location will depend on the filetype and their expected lifetime. It is good practice to keep all softwares, virtual environments, scripts and git repositories on the /home folder. The /work folder is suited to store the output of jobs and it has therefore a high disk quota, however the file lifetime cannot exceed 60 days. To store data which should be kept for longer period of times (i.e. trained models or grayscale data), the /data directory is approriate. We have created a directory exclusively for the use of nnUNet within the BOSYS department. This directory can be accessed under /data/bosys-nnunet/ and it currently has a disk quota of 4TB. The disk quota can be increased by the wkdv administrators upon request. 
+## 3.3. Storing data on your cluster
+There are several locations on which data can be stored on a HPC cluster. The appropriate location will depend on the filetype and their expected lifetime. It is good practice to keep all softwares, virtual environments, scripts and git repositories on the /home folder. The /work folder is suited to store the output of jobs and it has therefore a high disk quota, however the file lifetime can be limited. To store data which should be kept for longer period of times (i.e., trained models or grayscale data), the /data directory is approriate. 
+
+Note that not all HPC clusters have exactly the same directory structure and nomenclature, but many follow a similar convention like the aforementionned one. Here again, contact your IT administrator to find out the best data storage options for your data. 
 
 # 3.3. Requesting resources from your HPC Cluster
 Please consider the following when requesting resources on your cluster. One of the most important resource at EVE is the maximum runtime of jobs. It specifies a limit which a running job may not exceed. If the job exceeds the requested time, it will be killed automatically by the scheduler. The same applies for the requested memory per cpu. It is a good practice to optimize these parameters to avoid exceeding the job requirements, but to keep them as low as possible so that the scheduler grants resources quicker. 
