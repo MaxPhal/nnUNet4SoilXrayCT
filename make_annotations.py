@@ -4,71 +4,60 @@ from skimage.filters import threshold_otsu
 import napari
 import argparse
 import json
-import os 
+from pathlib import Path
 
-# Create the ArgumentParser object
-parser = argparse.ArgumentParser(description='Argument parsing')
+def parse_args():
+    parser = argparse.ArgumentParser(description='Process 3D .tif files and apply Otsu thresholding.')
+    parser.add_argument('-i', "--input", type=Path, required=True, help='Path to the input directory')
+    parser.add_argument('-o', "--output", type=Path, required=True, help='Path to save the output')
+    parser.add_argument('-id', "--sampleid", type=str, required=True, help='Sample ID')
+    parser.add_argument('-v', "--verbose", action='store_true', help='Increase output verbosity')
+    return parser.parse_args()
 
-# Define command-line arguments
-parser.add_argument('-i', type=str, required=True, help='Path to the input file')
-parser.add_argument('-o', type=str, required=True, help='Path to save the output')
-parser.add_argument('-id', type=str, required=True, help='Sample ID')
-parser.add_argument('-v', action='store_true', help='Increase output verbosity')
+def load_metadata(metadata_path):
+    with open(metadata_path, "r") as f:
+        metadata = json.load(f)
+    return metadata
 
-# Parse arguments from the terminal
-args = parser.parse_args()
+def process_image(input_path, sample_id):
+    image_path = input_path / f'{sample_id}.tif'
+    grayscale_data = tiff.imread(image_path)
+    print(f"Loaded {sample_id}, shape: {grayscale_data.shape}")
+    return grayscale_data
 
-# Load the 3D .tif file
-grayscale_data = tiff.imread(args.i + '/' + args.id + '.tif')
+def apply_threshold(grayscale_data):
+    middle_index = grayscale_data.shape[0] // 2 - 1
+    middle_slice = grayscale_data[middle_index]
+    otsu_thresh = threshold_otsu(grayscale_data)
+    binary_middle_slice = ((middle_slice < 220) & (middle_slice > otsu_thresh)).astype(np.uint8)
+    annotations = np.zeros_like(grayscale_data, dtype=np.uint8)
+    annotations[middle_index] = binary_middle_slice
+    return annotations
 
-# Check the shape of the 3D image (should be something like (z, y, x))
-print(f"Image {args.id} is loaded")
-print(f"Image shape: {grayscale_data.shape}")
+def normalize_colors(metadata):
+    color_dict = {int(k): tuple(v) for k, v in metadata["colors"].items()}
+    return {k: np.array(v) / 255 for k, v in color_dict.items()}
 
-# Get the middle slice index
-middle_index = (grayscale_data.shape[0] // 2)-1
-middle_slice = grayscale_data[middle_index]
+def visualize_data(grayscale_data, annotations, color_dict):
+    viewer = napari.Viewer()
+    viewer.add_image(grayscale_data, name='Grayscale data')
+    viewer.add_labels(annotations, name="Annotations", color=color_dict, opacity=1, blending='additive')
+    napari.run()
 
-# Calculate Otsu threshold on the whole subvolume
-otsu_thresh = threshold_otsu(grayscale_data)
-# Apply Otsu thresholding
-binary_middle_slice = ((middle_slice < 220) & (middle_slice > otsu_thresh)).astype(np.uint8)
+def save_annotations(output_path, sample_id, annotations):
+    output_path.mkdir(parents=True, exist_ok=True)
+    output_file = output_path / f'{sample_id}.tif'
+    tiff.imwrite(output_file, annotations.astype(np.uint8))
+    print(f"Annotations saved to {output_file}")
 
-# Create an empty 3D stack of zeros
-annotations = np.zeros_like(grayscale_data, dtype=np.uint8)
+def main():
+    args = parse_args()
+    grayscale_data = process_image(args.i, args.id)
+    annotations = apply_threshold(grayscale_data)
+    metadata = load_metadata(Path.cwd() / 'dataset_info.json')
+    color_dict = normalize_colors(metadata)
+    visualize_data(grayscale_data, annotations, color_dict)
+    save_annotations(args.o, args.id, annotations)
 
-# Insert the binary middle slice into the correct position
-annotations[middle_index] = binary_middle_slice
-
-# Load the JSON file
-cwd = os.getcwd()
-with open(cwd + '/dataset_info.json', "r") as metadata_json_file:
-    metadata = json.load(metadata_json_file)
-
-# Extract label names
-label_names = metadata["labels"]
-
-# Extract color dictionary (convert keys back to integers)
-color_dict = {int(k): tuple(v) for k, v in metadata["colors"].items()}
-
-# Normalize the RGB values for Napari (values must be between 0 and 1)
-normalized_color_dict = {k: (np.array(v) / 255) for k, v in color_dict.items()}
-
-# Launch Napapi 
-viewer = napari.Viewer()
-viewer.add_image(grayscale_data, name='Grayscale data')
-
-# Add label layer with properties
-label_layer = viewer.add_labels(annotations, 
-                                name="Annotations", 
-                                color=normalized_color_dict, 
-                                opacity=1,
-                                blending='additive')
-napari.run()
-
-# Save annotations as 3D .tif 8-bit format (values between 0-255)
-annotations_8bit = annotations.astype(np.uint8)
-    
-# Save the 3D .tif file
-tiff.imwrite(args.o + '/' + args.id + '_annotations.tif', annotations_8bit)
-print(f"Annotations of {args.id} saved to {args.o}")
+if __name__ == "__main__":
+    main()
