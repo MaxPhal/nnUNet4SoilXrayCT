@@ -20,7 +20,7 @@ We hope that this philosophy and the level of details of this document will help
 <!-- We are aware that the fluidity of the code could have been improved. On some occasions even, a few file format conversion are superfluous. On purpose, we chose to go for redundancy instead of modifying the native code of nnUNet. -->
 
 # Nomenclature
-Before getting down to business, let´s define a few terms to avoid any potential confusion. 
+Before getting down to business, let´s define a few terms to avoid potential confusion. 
 - Dataset: Collection of all images and annotation
 - Image: one single (.tif, .mha or .nii.gz) file which contains the grayscale values
 - Class: a category present in the images, e.g., for instance "roots", "soil matrix" or "biopores" 
@@ -105,14 +105,15 @@ For image annotation, we developed a strategy that minimizes annotation efforts 
 
 To do so in a semi-automatic manner, we created the `make_annotations.py` script. 
 Once the classes are modified according to your dataset and the colors are defined for each label, you can launch the `make_annotations.py` script. This script takes three arguments, i.e., the input folder path (the path to the folder containing the images that you want to annotate), the output folder path (the path to the folder where the annotations will be saved) and the sample ID (the name of your image). These arguments are passed from the command terminal with the three flags "-i", "-o" and "-id", respectively.   
-````
-python make_annotations.py -i </path/to/the/images/to/annotate> -o </path/to/where/annotations/will_be/saved> -id <sample_ID>
+
+````shell
+python make_annotations.py -i /path/to/the/images/to/annotate -o /path/to/where/annotations/will_be/saved -id sample_ID
 # Example
 python make_annotations.py -i C:\Users\phalempi\Desktop\images -o C:\Users\phalempi\Desktop\annotations -id SPP_P21_SPE_UC193
 ````
 Just a few moment after launching the script, the image name and shape will be printed in the terminal. Afterwards, the GUI of Napari pops up and displays the middle slice of the loaded image. On that middle slice, the soil matrix appears in color (115,  0, 102) (RGB). To get familiar with the GUI of Napari, we recommend consulting external resources. There are some very good explanatory videos out there (for instance on YouTube) that show how to efficiently annotate images with Napari. Because a short video is more impactful than thousands words, we won´t go over the procedure in this repository. Note that with the current version of nnUNet at least five annotations are needed. In all cases, we recommend not using less than five annotations.
 
-Once you are done annotating your images, close the Napari GUI and the annotated images will be automatically saved under the path given after the flag -o. Before going further with data preparation, make sure to deactivate the current virtual environment.
+Once you are done annotating your images, close the Napari GUI and the annotated images will be automatically saved under the path given after the flag -o. Note that if this directory does not exist, it will be created automatically. Before going further with data preparation, make sure to deactivate the current virtual environment.
 ````
 mamba deactivate
 ````
@@ -272,7 +273,7 @@ Depending on the resources currently available, SLURM will distribute each train
 
 # 5. Inference
 ## 5.1. Preprocessing of the images to be predicted 
-This step aims to preprocess the images that you want to run the predictions on (i.e., the ones that were not selected as part of the training dataset). This preprocessing mainly entails an image normalization and a conversion from a 3D .tif stack to a format nnUNet can read, i.e., .nii.gz. To convert the images with the following command: 
+This step aims to preprocess the images that you want to run the predictions on (i.e., the ones that were not selected as part of the training dataset). This preprocessing mainly entails an image normalization and a conversion from a 3D .tif stack to a format nnUNet can read, i.e., .nii.gz. To convert the images with the following commands. 
 
 When images to predict are in 3D .tif format, please use: 
 ````shell
@@ -282,7 +283,14 @@ When images to predict are in 3D .mha format, please use:
 ````shell
 python preprocessing_nnUNet_predict.py -i /path/to/images_mha -o /path/to/images_nii
 ````
+
+If you used another normalization method than "zscore" for the preprocessing of your training images, the normalization type has to be specified here again after the "-n" flag, for example:
+
+````shell
+python preprocessing_nnUNet_predict_tif.py -i /path/to/images_tif -o /path/to/images_nii -n noNorm
+````
 ## 5.2. Splitting the images
+<!-- Question: why can we not give a norm_type here too? -->
 We highly recommend to split the images after conversion to .nii.gz. This splitting basically isolate smaller cutouts in the z-direction of the original image. The benefits of splitting the images are two-folds: 
 1) It divides the images into smaller parts, so as to make sure that they are small enough to fit onto the GPU VRAM.
 2) It allows to spread the predictions more efficiently across the GPU nodes of the cluster with array jobs. 
@@ -292,7 +300,7 @@ To split the data, use the following command:
 python preprocessing_nnUNet_predict_split.py -i /input/path/to/images_nii/to_split -o /output/path/for/split/images -s 8 -m /path/to/the/trained/model
 ````
 Here there are several things to note: 
-1) The model (given after the flag -m) is located at: \nnUNet_results\Dataset<TaskID>_<DatasetName>\nnUNetTrainer_betterIgnoreSampling__nnUNetPlans__3d_fullres. The command actually works without giving the model path, but default values are taken then. Since the nnUNet_results folder is on the cluster, you might want to either run `preprocessing_nnUNet_predict_split.py` from the terminal of the cluster or transfer back the nnUNet_results folder to your workstation in order to do the splitting there. The reason why we give the model here is that patch size and spacing are read from the plans.json file located in the model folder. The patch size and image spacing are used to calculate the overlap that will be used during splitting the images. Choosing an appropriate overlap is necessary to avoid segmentation artifacts between image splits. 
+1) The model (given after the flag -m) is located at: \nnUNet_results\Dataset<TaskID>_<DatasetName>\nnUNetTrainer_betterIgnoreSampling__nnUNetPlans__3d_fullres. The command actually works without giving the model path, but default values are taken then. Since the nnUNet_results folder is on the cluster, you might want to either run `preprocessing_nnUNet_predict_split.py` from the terminal of the cluster or transfer back the nnUNet_results folder to your workstation to do the splitting there. The reason why we give the model here is that patch size and spacing are read from the plans.json file located in the model folder. The patch size and image spacing are used to calculate the overlap that will be used during splitting the images. Choosing an appropriate overlap is necessary to avoid segmentation artifacts between image splits. 
 
 2) The number of splits (given after the flag -s) has to be set by you. The appropriate value will depend on the VRAM of the GPU that you use. So far, we have had good results working with splits with values between 8 and 10, which means that the resulting image size would usually be inferior to 500 MB. 
 
@@ -359,14 +367,11 @@ where the parameters "0" and "n" correspond to indices used to retrieve the samp
 sacct
 ````
 ## 5.4. Post-processing of the predictions 
-### 5.4.1 Ensemble the splitted Images 
-
-Needs only be done if images got split in Step 2.
+### 5.4.1 Concatenate the predicted images 
+Assuming you have used the `preprocessing_nnUNet_predict_split.py` script previously, the predicted images now have to be concatenated back into a volume having the original shape, while making sure to get rid of overlapping regions. This is exactly what ``postprocessing_nnUNet_predict_concatenate.py`` does.
 
 ````shell
-python postprocessing_nnUNet_predict_ensemble.py -i <input.path.to.splitted.prediction> -o <output.path.for.ensembled.predictoin>
-# Example
-python postprocessing_nnUNet_predict_ensemble.py -i /media/l727r/data/UFZ_CTPoreRootSegmentation/HI_dataset2_grass_vs_crop/test_splitting/splitted_prediction -o /media/l727r/data/UFZ_CTPoreRootSegmentation/HI_dataset2_grass_vs_crop/test_splitting/prediction
+python postprocessing_nnUNet_predict_concatenate.py -i /input/path/to/your/splitted_prediction -o /outpath/to/your/saved_prediction
 ````
 
 ### 5.4.2 Final file conversion
