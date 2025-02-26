@@ -57,7 +57,7 @@ def ensemble_files(img_folder, output_folder):
                 img_data = np.concatenate((img_data, img_i_data), axis=axis)
 
         img = sitk.GetImageFromArray(img_data.transpose((2, 1, 0)))
-        img = img[::-1, :, :]  # flip the image in the x-axis (vertically)
+        img = img[:, ::-1, :]  # flip the image in the y-axis (vertically) back to how it was before
        
         img.SetOrigin(img_origin)
         img.SetDirection(img_direction)

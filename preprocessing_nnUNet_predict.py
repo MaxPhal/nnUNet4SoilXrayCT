@@ -7,7 +7,7 @@ import nibabel as nib
 import numpy as np
 from tqdm import tqdm
 
-from preprocessing_nnUNet_train import convert_mha_to_hdr, img_normalize, convert_tif_to_hdr
+from preprocessing_nnUNet_train import convert_mha_to_hdr, img_normalize
 
 
 def convert_hdr_to_nii_normalize(input_dir: str,norm_type:str) -> None:
@@ -69,6 +69,6 @@ if __name__ == "__main__":
 
     input_dir_images = args.input
     output_dir_images = args.output
-    #convert_mha_to_hdr(input_dir_images, output_dir_images)
-    convert_tif_to_hdr(input_dir_images, output_dir_images)
+    convert_mha_to_hdr(input_dir_images, output_dir_images)
+    #convert_tif_to_hdr(input_dir_images, output_dir_images)
     convert_hdr_to_nii_normalize(output_dir_images, args.norm)

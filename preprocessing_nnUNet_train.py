@@ -246,7 +246,6 @@ if __name__ == "__main__":
 
         img_data = img_data[:, :, z_min:z_max] # crop the image to annotations
         img_data = img_normalize(img_data, norm_type)
-        img_data = img_data[::-1, :, :]  # flip the image in the x-axis (vertically)
         
         # Save Image File
         nib.save(

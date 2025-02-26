@@ -8,10 +8,12 @@ from pathlib import Path
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Process 3D .tif files and apply Otsu thresholding.')
-    parser.add_argument('-i', "--input", type=Path, required=True, help='Path to the input directory')
-    parser.add_argument('-o', "--output", type=Path, required=True, help='Path to save the output')
-    parser.add_argument('-id', "--sampleid", type=str, required=True, help='Sample ID')
-    parser.add_argument('-v', "--verbose", action='store_true', help='Increase output verbosity')
+    parser.add_argument('-i', type=Path, required=True, help='Path to the input directory')
+    parser.add_argument('-o', type=Path, required=True, help='Path to save the output')
+    parser.add_argument('-id', type=str, required=True, help='Sample ID')
+    parser.add_argument('-resume', type=str, required=True, help='Whether to load previous annotations or not - Possible answers: yes, no')
+    parser.add_argument('-write', type=str, required=True, help='Whether to save annotations or not - Possible answers: yes, no - /!\ yes overwrites previous annotations')
+    parser.add_argument('-v', action='store_true', help='Increase output verbosity')
     return parser.parse_args()
 
 def load_metadata(metadata_path):
@@ -24,6 +26,12 @@ def process_image(input_path, sample_id):
     grayscale_data = tiff.imread(image_path)
     print(f"Loaded {sample_id}, shape: {grayscale_data.shape}")
     return grayscale_data
+
+def load_annotations(output_path, sample_id):
+    image_path_annotations = output_path / f'{sample_id}.tif'
+    saved_annotations = tiff.imread(image_path_annotations)
+    print(f"Loaded previously saved annotations of {sample_id}")
+    return saved_annotations
 
 def apply_threshold(grayscale_data):
     middle_index = grayscale_data.shape[0] // 2 - 1
@@ -53,11 +61,19 @@ def save_annotations(output_path, sample_id, annotations):
 def main():
     args = parse_args()
     grayscale_data = process_image(args.i, args.id)
-    annotations = apply_threshold(grayscale_data)
+
+    if args.resume == 'yes':
+        annotations = load_annotations(args.o, args.id)
+    elif args.resume == 'no':   
+        annotations = apply_threshold(grayscale_data)
     metadata = load_metadata(Path.cwd() / 'dataset_info.json')
     color_dict = normalize_colors(metadata)
     visualize_data(grayscale_data, annotations, color_dict)
-    save_annotations(args.o, args.id, annotations)
-
+    
+    if args.write == 'yes':
+        save_annotations(args.o, args.id, annotations)
+    elif args.write == 'no':   
+        print("Annotations were not saved")
+    
 if __name__ == "__main__":
     main()
