@@ -7,12 +7,12 @@ import json
 from pathlib import Path
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Process 3D .tif files and apply Otsu thresholding.')
+    parser = argparse.ArgumentParser(description='This is script to prepare ground truth annotations using Napari.')
     parser.add_argument('-i', type=Path, required=True, help='Path to the input directory')
     parser.add_argument('-o', type=Path, required=True, help='Path to save the output')
     parser.add_argument('-id', type=str, required=True, help='Sample ID')
-    parser.add_argument('-resume', type=str, required=True, help='Whether to load previous annotations or not - Possible answers: yes, no')
-    parser.add_argument('-write', type=str, required=True, help='Whether to save annotations or not - Possible answers: yes, no - /!\ yes overwrites previous annotations')
+    parser.add_argument('-resume', type=str, default= 'no',  required=False, help='Whether to load previous annotations or not - Possible answers: yes, no - Default is no')
+    parser.add_argument('-write', type=str, default= 'yes', required=False, help='Whether to save annotations or not - Possible answers: yes, no - /!\ yes overwrites previous annotations - - Default is yes')
     parser.add_argument('-v', action='store_true', help='Increase output verbosity')
     return parser.parse_args()
 
