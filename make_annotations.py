@@ -6,22 +6,12 @@ import argparse
 import json
 from pathlib import Path
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='This is script to prepare ground truth annotations using Napari.')
-    parser.add_argument('-i', type=Path, required=True, help='Path to the input directory')
-    parser.add_argument('-o', type=Path, required=True, help='Path to save the output')
-    parser.add_argument('-id', type=str, required=True, help='Sample ID')
-    parser.add_argument('-resume', type=str, default= 'no',  required=False, help='Whether to load previous annotations or not - Possible answers: yes, no - Default is no')
-    parser.add_argument('-write', type=str, default= 'yes', required=False, help='Whether to save annotations or not - Possible answers: yes, no - /!\ yes overwrites previous annotations - - Default is yes')
-    parser.add_argument('-v', action='store_true', help='Increase output verbosity')
-    return parser.parse_args()
-
 def load_metadata(metadata_path):
     with open(metadata_path, "r") as f:
         metadata = json.load(f)
     return metadata
 
-def process_image(input_path, sample_id):
+def load_image(input_path, sample_id):
     image_path = input_path / f'{sample_id}.tif'
     grayscale_data = tiff.imread(image_path)
     print(f"Loaded {sample_id}, shape: {grayscale_data.shape}")
@@ -59,21 +49,33 @@ def save_annotations(output_path, sample_id, annotations):
     print(f"Annotations saved to {output_file}")
 
 def main():
-    args = parse_args()
-    grayscale_data = process_image(args.i, args.id)
 
-    if args.resume == 'yes':
+    # Parsing arguments from command line
+    parser = argparse.ArgumentParser(description='This is script to prepare ground truth annotations using Napari.')
+    parser.add_argument('-i', type=Path, required=True, help='Path to the input directory')
+    parser.add_argument('-o', type=Path, required=True, help='Path to save the output')
+    parser.add_argument('-id', type=str, required=True, help='Sample ID')
+    parser.add_argument('-write', type=str, default= 'yes', required=False, help='Whether to save annotations or not - Possible answers: yes, no - /!\ yes overwrites previous annotations - Default is yes')
+    parser.add_argument('-v', action='store_true', help='Increase output verbosity')
+    args = parser.parse_args()
+
+    # loading grayscale data
+    grayscale_data = load_image(args.i, args.id)
+
+    # loading annotations if they exist, otherwise applying Otsu threshold
+    if (args.o / f'{args.id}.tif').exists():
         annotations = load_annotations(args.o, args.id)
-    elif args.resume == 'no':   
+    else:   
         annotations = apply_threshold(grayscale_data)
     metadata = load_metadata(Path.cwd() / 'dataset_info.json')
     color_dict = normalize_colors(metadata)
     visualize_data(grayscale_data, annotations, color_dict)
-    
+
+    # saving annotations if user wants to
     if args.write == 'yes':
         save_annotations(args.o, args.id, annotations)
     elif args.write == 'no':   
-        print("Annotations were not saved")
+        print("Newly made annotations (if they were any) were not saved")
     
 if __name__ == "__main__":
     main()

@@ -384,8 +384,12 @@ After the previous step, your segmentation results are ready in .nii.gz format. 
 python postprocessing_nnUNet_predict.py -i /input/path/to/your/splitted_prediction -o /outpath/to/your/saved_prediction
 ````
 # 7. Log analysis
+## 7.1. Retrieve training logs and loss function
 
-to extract results in a format that can be diretly used for generating figures for papers. These results include data such as Dice scores or the value of the Loss function as a function of the number of epochs during training
+
+
+## 7.2. Retrieve a general Dice score
+
 
 # Comments
 - **Format of input images:** There is the possibility to start with grayscale images in .mha format. 
