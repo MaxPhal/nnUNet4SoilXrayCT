@@ -39,7 +39,7 @@ Our workflow includes several crucial steps such as image annotation, conversion
 
 Our workflow relies on the use of HPC cluster to perform computionnally demanding tasks such as training and inference. We highly recommend you do the same because GPUs are so much faster than CPUs. Also, we have developed this workflow in a way that several GPUs can work in parallel on several cutouts of the same image. This feature allows increased processing speed, which makes it highly competitive, even against less computationally demanding segmentation methods. 
 
-If your university or research insitution does not offer access to a HPC cluster, consider relying on dedicated GPU Servers that can be rented. For processing tasks that rely on CPUs only, we recommend using a regular workstation. Here, we used a workstation running on Windows (64-bit, Intel(R) Xeon(R) Gold 6142 CPU and 192 GB RAM) for CPU tasks only. For GPU tasks only, we used the [EVE cluster](https://www.ufz.de/index.php?en=51499). The EVE cluster is a HPC cluster maintained by the UFZ and which hosts several NVIDIA A100. 
+If your university or research institution does not offer access to a HPC cluster, consider relying on dedicated GPU Servers that can be rented. For processing tasks that rely on CPUs only, we recommend using a regular workstation. Here, we used a workstation running on Windows (64-bit, Intel(R) Xeon(R) Gold 6142 CPU and 192 GB RAM) for CPU tasks only. For GPU tasks only, we used the [EVE cluster](https://www.ufz.de/index.php?en=51499). The EVE cluster is a HPC cluster maintained by the UFZ and which hosts several NVIDIA A100. 
 
 # 1.  Provide dataset information
 The first step of our workflow is to provide some parameters and informations in the ```dataset_info.json``` file. In this file, set the TaskID as any three digit number of your choice, choose a meaningul name for your dataset and a normalization method (more on that later in the documentation, for now you can leave it as is). Set the labels according to the classes of interest that you want to segment. Finally, set a RGB code that defines how each class is displayed during the annotation of your images. Below, we show the class definition that we used for the Dataset 1 (see our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1) for more information).
@@ -86,7 +86,7 @@ When working with Python, we often rely on various plugins and software librarie
 ````shell
 mamba create -n venv-napari python=3.11
 ````
-If you wish, replace "venv-napari" by any name if you want to give to your virtual environment. Choose a name that is meaningful and easy to remember as you are likely to be using it often.  Make sure to activate your virtual environment before proceeding with further installations:
+If you wish, replace "venv-napari" by any name you want to give to your virtual environment. Choose a name that is meaningful and easy to remember as you are likely to use it often.  Make sure to activate your virtual environment before proceeding with further installations:
 ````shell
 mamba activate venv-napari
 ````
@@ -109,14 +109,14 @@ To create representative ground truth datasets, it is important to select subvol
 ## 2.3. Image annotation
 For image annotation, we developed a strategy that minimizes annotation efforts while still ensuring that all relevant classes are captured. This strategy relies on dense annotations of one slice and on sparse annotations for other interesting classes within a stack (see figure 2 in our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1)). To perform dense annotations, the middle slice of the stack is segmented with Otsu thresholding to isolate the soil matrix and it is heavily densely manually for the other classes. 
 
-To do so in a semi-automatic manner, we created the `make_annotations.py` script. This script takes three arguments, i.e., the input folder path (the path to the folder containing the images that you want to annotate), the output folder path (the path to the folder where the annotations will be saved) and the sample ID (the name of your image). These arguments are passed from the command terminal with three flags, i.e., "-i", "-o" and "-id", respectively.   
+To do so in a semi-automatic manner, we created the `make_annotations.py` script. This script takes three arguments, i.e., the input folder path (the path to the folder containing the images that you want to annotate), the output folder path (the path to the folder where the annotations will be saved) and the sample ID (the name of your 3D tif image, without its extension). These arguments are passed from the command terminal with three flags, i.e., "-i", "-o" and "-id", respectively.   
 
 ````shell
 python make_annotations.py -i /path/to/the/images/to/annotate -o /path/to/where/annotations/will_be/saved -id sample_ID
 # Example
 python make_annotations.py -i C:\Users\phalempi\Desktop\images -o C:\Users\phalempi\Desktop\annotations -id SPP_P21_SPE_UC193
 ````
-Just a few moment after launching the script, the image name and shape will be printed in the terminal. Afterwards, the GUI of Napari pops up and displays the middle slice of the loaded image. On that middle slice, the soil matrix appears in color (for us 115,  0, 102 in RGB code). Note that if annotations are present in the output folder (because you saved but did not finish annotating one image), the previous annotations will be loaded automatically. 
+Just a few moment after launching the script, the GUI of Napari pops up and displays the middle slice of the loaded image. On that middle slice, the soil matrix appears in color (for us 115,  0, 102 in RGB code). Note that if annotations are present in the output folder (because you saved but did not finish annotating one image), the previous annotations will be loaded automatically. 
 
 To get familiar with the GUI of Napari, we recommend consulting external resources. There are some very good explanatory videos out there (for instance on YouTube) that show how to efficiently annotate images with Napari. Because a short video is more impactful than thousand words, we won´t go over the procedure in this repository. Note that with the current version of nnUNet at least five annotations are needed. In all cases, we recommend not using less than five annotations.
 
@@ -171,7 +171,7 @@ Open the \_\_path__.py file (from this repository) with a Text Editor and adapt 
 4) the path to your annotations (input_dir_masks) # IMPORTANT: annotations should already be in 3D stack .tif format if you used `make_annotations.py` to generate the annotations
 
 ## 3.2. Data conversion
-This step takes the image and annotation files from two given folders, processes them and saves them as .nii.gz in the nnUNet_raw folder. Here, you have to keep in mind that our workflow work in a "folder-based" manner. This means that all images should be in one folder and all annotations should be in another one. 
+This step takes the image and annotation files from two given folders, processes them and saves them as .nii.gz in the nnUNet_raw folder. Here, you have to keep in mind that our workflow works in a "folder-based" manner. This means that all images should be in one folder and all annotations should be in another one. 
 
 Data conversion entails converting the input files to .nii.gz, handling the ignore label in the annotations, cropping image and annotation to the relevant parts, normalizing the image crops and putting everything into the nnUNet format (adhering to nnUNets naming conventions of folders and files). During this step, data will be normalized according to four possible methods:
 
@@ -209,7 +209,7 @@ There are several locations on which data can be stored on a HPC cluster. The ap
 Note that not all HPC clusters have exactly the same directory structure and nomenclature, but many follow a similar convention like the aforementionned one. Here again, contact your IT administrator to find out the best data storage options for your data. 
 
 ## 4.4. Requesting resources from your HPC Cluster
-While requesting resources from your cluster, you have bear in mind a few aspects. One of the most important one is the maximum runtime of jobs. It specifies a time limit that a running job can not exceed. If the job exceeds the requested time, it will be killed automatically by the scheduler. The same applies for the requested memory per cpu. It is a good practice to optimize these parameters to avoid exceeding the job requirements, but to keep them as low as possible so that the scheduler grants resources quicker. 
+While requesting resources from your cluster, you have to bear in mind a few aspects. One of the most important one is the maximum runtime of jobs. It specifies a time limit that a running job can not exceed. If the job exceeds the requested time, it will be killed automatically by the scheduler. The same applies for the requested memory per cpu. It is a good practice to optimize these parameters to avoid exceeding the job requirements, but to keep them as low as possible so that the scheduler grants resources quicker. 
 
 <!-- FOR UFZ Users: Note also that GPU Nodes only have a maximum of 470GB RAM available. This means that the total amount of RAM (calculated as cpus-per-task * mem-per-cpu) has to be inferior to 470GB -->  
 
@@ -237,10 +237,10 @@ Note that, here, we install an older PyTorch version (compatible with the CUDA p
 To install nnUNet, please repeat the operation described at the section 2.1.3. 
 
 ### 4.5.4. Moving your files to the HPC cluster
-Once nnUNet is installed, you can move the nnUNet_preprocessed folder can be moved to a directory of your choice of your cluster. 
+Once nnUNet is installed, you can move the nnUNet_preprocessed folder can be moved to a directory of your choice on your cluster. 
 
 # 5. Training
-This step uses the content of the nnUNet_preprocessed folder and saves the models, logs and checkpoints in the nnUNet_results folder. nnUNet is trained using a 5-fold cross-validation scheme. This means that separate training folds are performed and each of the fold creates a classifier file which contains the weights of the model. To run the training your cluster, open the file `submit_nnunet_training.sh` with a text editor (e.g., gedit):
+This step uses the content of the nnUNet_preprocessed folder and saves the models, logs and checkpoints in the nnUNet_results folder. nnUNet is trained using a 5-fold cross-validation scheme. This means that separate training folds are performed and each of the fold creates a classifier file which contains the weights of the model. To run the training on your cluster, open the file `submit_nnunet_training.sh` with a text editor (e.g., gedit):
 
 <!-- the classifier file is named "checkpoints_best.pth" -->
 
@@ -319,7 +319,7 @@ Once your images are split, upload them to a folder of your choice (/path/to/inp
 ### 6.3.1 Preparing of array jobs for the predictions
 In order to run the predictions in a parallelized fashion on your cluster, each image split must be placed in one folder. The reason is that nnUNet predicts all the images in a given folder. By putting one image per folder, the memory and time requirements for your job are low and the images can be distributed effectively across the nodes hosting GPUs. 
 
-To spare you the effort of moving each image into its individual folder, we created a shell script ``mkdir_movefiles.sh`` that does the job for you. This shell script subsequently creates directories and moves the image files in them. It takes two arguments: (1) the input folder containing the images to be predicted and (2) the directory path where the folders will be created. These arguments are given after the flags -i and -o, respectively. You can run the shell script with the following command. 
+To spare you the effort of moving each image into its individual folder, we created a shell script ``mkdir_movefiles.sh`` that does the job for you. This shell script subsequently creates directories and moves the image files into them. It takes two arguments: (1) the input folder containing the images to be predicted and (2) the directory path where the folders will be created. These arguments are given after the flags -i and -o, respectively. You can run the shell script with the following command. 
 
 ````shell
 sh mkdir_movefiles.sh -i /path/to/input/images -o /path/to/output/images
@@ -375,7 +375,7 @@ sacct
 ````
 ## 6.4. Post-processing of the predictions 
 ### 6.4.1 Concatenate the predicted images 
-Assuming you have used the `preprocessing_nnUNet_predict_split.py` script previously, the predicted images now have to be concatenated back into a volume having the shape of the imput image, while making sure to get rid of overlapping regions. This is exactly what ``postprocessing_nnUNet_predict_concatenate.py`` does.
+Assuming you have used the `preprocessing_nnUNet_predict_split.py` script previously, the predicted images now have to be concatenated back into a volume having the shape of the input image, while making sure to get rid of overlapping regions. This is exactly what ``postprocessing_nnUNet_predict_concatenate.py`` does.
 
 ````shell
 python postprocessing_nnUNet_predict_concatenate.py -i /input/path/to/your/splitted_prediction -o /outpath/to/your/saved_prediction
