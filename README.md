@@ -83,16 +83,22 @@ Miniforge is a lightweight version of Anaconda that helps install and manage Pyt
 
 ### 2.1.2. Create a virtual environment <!-- Successful on BOPHY116 -->
 When working with Python, we often rely on various plugins and software libraries that need to be well-organized. One effective way to manage them is by using Conda environments. A Conda environment functions like a virtual workspace or isolated system, accessible through the terminal. Software installed within one Conda environment remains separate and may not be available in others. Please use the following command in your Miniforge terminal to create a virtual environment.
-````
+````shell
 mamba create -n venv-napari python=3.11
 ````
 If you wish, replace "venv-napari" by any name if you want to give to your virtual environment. Choose a name that is meaningful and easy to remember as you are likely to be using it often.  Make sure to activate your virtual environment before proceeding with further installations:
-````
+````shell
 mamba activate venv-napari
 ````
+Then set your working directory to the folder containing the python scripts of this repository.
+
+````shell
+cd /path/to/the/folder/nnUNet4SoilXrayCT
+````
+
 ### 2.1.3. Install devbio-napari <!-- Successful on BOPHY116 -->
 Napari is an open-source tool for viewing and analyzing large 2D and 3D images, commonly used in scientific research. It provides an interactive, user-friendly interface for exploring image data, making annotations, and applying analysis techniques. What we love so much about Napari is that it is scriptable which makes it really easy to work with. We recommend devbio-napari, a distribution of [Napari](https://github.com/haesleinhuepf/devbio-napari) with a set of plugins for bioimage analysis. In our workflow, we used Napari to annotate images. Use the following command in your Miniforge terminal to install devbio-napari.
-````
+````shell
 mamba install devbio-napari pyqt -c conda-forge
 ````
 ## 2.2. Image selection
@@ -115,31 +121,31 @@ Just a few moment after launching the script, the image name and shape will be p
 To get familiar with the GUI of Napari, we recommend consulting external resources. There are some very good explanatory videos out there (for instance on YouTube) that show how to efficiently annotate images with Napari. Because a short video is more impactful than thousand words, we won´t go over the procedure in this repository. Note that with the current version of nnUNet at least five annotations are needed. In all cases, we recommend not using less than five annotations.
 
 Once you are done annotating your images, close the Napari GUI and the annotated images will be automatically saved under the path given after the flag -o. Currently, annotations are automatically saved and previous annotations are overwritten. If this behavior is not desirable for you, you can give an extra argument with the flag "-write". If the value 'no' is used, the annotations will not be saved. Note that if the output directory does not exist, it will be created. Before going further with data preparation, make sure to deactivate the current virtual environment.
-````
+````shell
 mamba deactivate
 ````
 # 3. Data preparation 
 ## 3.1. Setting up your computer 
 ### 3.1.1. Create a virtual environment <!-- Successful on BOPHY116 -->
 Unfortunately, devbio-napari and nnUNet can not be installed in the same virtual environment because of conflicts between version packages. This means that we need to install another virtual environment to work with nnUNet. We can create a virtual environment and activate with a single command line as follows: 
-````
+````shell
 mamba create -n venv-nnunet python=3.11 && conda activate venv-nnunet
 ````
 ### 3.1.2. Install git <!-- Successful on BOPHY116 -->
 Git is a version control system that helps track changes in code and collaborate on projects. Git can also be used to download code as it allows users to clone repositories from remote servers (e.g., GitHub, GitLab, Bitbucket). Here, we are using git to download the nnUNet repository from GitHub. To install git, type the following command in your terminal.
-````
+````shell
 mamba install git
 ````
 ### 3.1.3. Install nnUNet <!-- Successful on BOPHY116 -->
 nnUNet is a self-configuring deep learning framework for medical image segmentation. It automatically adapts to new datasets by optimizing preprocessing, network architecture, and training settings, making it a powerful and user-friendly tool for segmentation tasks. More information on nnUNet can be found [here](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/installation_instructions.md#installation-instructions). To install nnUNet, enter the following commands: 
-````
+````shell
 git clone https://github.com/MIC-DKFZ/nnUNet.git
 cd nnUNet
 pip3 install -e .
 ````
 After installing nnUNet, create some folders named "nnUNet_raw" and "nnUNet_preprocessed". After creating the folders, set them as environmental variables using the following commands in your Miniforge
 terminal: 
-````
+````shell
 set nnUNet_raw = your/path/to/nnUNet_raw
 set nnUNet_preprocessed = your/path/to/nnUNet_preprocessed
 ````
@@ -183,11 +189,11 @@ python preprocessing_nnUNet_train.py
 ## 3.3. Preprocessing and planing
 The preprocessing and experiment planing are default steps in the native nnUNet pipeline. These steps use the data from nnUNet_raw, processes them and saves them in the nnUNet_preprocessed folder. Depending on your data, this can take a while and consume a lot of RAM. You can run the preprocessing with the following command.
 
-```shell
+````shell
 nnUNetv2_plan_and_preprocess -d <TaskID> -c 3d_fullres -np <num.processes> -npfp <num.processes>
 # Example
 nnUNetv2_plan_and_preprocess -d 777 -c 3d_fullres -np 4 -npfp 4
-```
+````
 The TaskID parameter is the one you defined in ``dataset_info.json``. The -np and -npfp parameters define how many processes are used during the preprocessing.  A higher number means that the preprocessing is faster but more RAM is consumed, while lower numbers means that less RAM is needed but the processing will take longer. You can play around with this parameter, for us 4 worked well. Now that your data abides to the nnUNet format and are preprocessed, the training process can start. But first, let´s have a few words on HPC clusters...
 
 # 4. High Performance Computer cluster
