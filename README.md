@@ -384,25 +384,27 @@ After the previous step, your segmentation results are ready in .nii.gz format. 
 python postprocessing_nnUNet_predict.py -i /input/path/to/your/splitted_prediction -o /outpath/to/your/saved_prediction
 ````
 # 7. Log analysis
-In this section, we describe two extra utilities that can be used to extract information on training and validation metrics. These utilities use data from .json and .txt files located in the "nnUNet_results/Dataset<TaskId>_<Name>/nnUNetTrainer_betterIgnoreSampling__nnUNetPlans__3d_fullres/". In this folder, the log results for each training fold are contained in "./fold<X>/training_log....txt" for the metrics during training and in "./fold<X>/validation/summary.json" for the metrics on validation. For ease-of-use, we recommend that you move these files to dedicated folders. You will want to rename the "summary.json" files as they have the same name and your OS will likely complain if you put them in one folder (helps with clarity as well!). In the following sections, we will assume that you have done so. In general, we also recommend that you inspect these files so as to get a better understanding of the output data and its format.
+In this section, we describe two extra utilities that can be used to extract information on training and validation metrics. These utilities use data from files located in the "nnUNet_results/Dataset_X_YY/nnUNetTrainer_betterIgnoreSampling__nnUNetPlans__3d_fullres/". In this folder, the log results for each training fold are contained in "./fold_X/training_log_X.txt" for training metrics and in "./fold_X/validation/summary.json" for validation metrics. For ease-of-use, we recommend moving these files to dedicated folders. You will want to rename the "summary.json" files as they have the same name and your OS will likely complain if you put them in one folder (helps with clarity as well!). In the following sections, we will assume that you have done so. In general, we also recommend inspecting these files to get a better understanding of the output data and its format.
 
-## 7.1. Retrieve training logs and loss function
-By default, nnUNet creates a figure (called "progress.png") which plots the evolution of the loss function during training and validation. This is done for each training individually. In order to obtain the evolution of the loss function for the whole training procedure, it is necessary to average the loss values for the five training folds. For this, we wrote the ``extract_trainlog.py`` script. This script reads the values "train_loss" and "val_loss" from the "training_log.txt" files, averages them and calculates the standard deviation. It then outputs a single .pdf file containing a plot of the data. Additionnally, it creates a "summary.csv" file which contains the output data in a tabular format. Here also, the script takes two arguments from the terminal.
+## 7.1. Training logs and loss function
+By default, nnUNet creates a figure (called "progress.png") which plots the evolution of the loss function during training and validation. This is done for each fold individually. In order to obtain the evolution of the loss function for the whole training procedure, it is necessary to average the loss values for the five folds. To do this, we wrote the ``extract_trainlog.py`` script. This script reads the values "train_loss" and "val_loss" from the "training_log.txt" files, averages them and calculates the standard deviation. It then outputs a single .pdf file containing a plot of the data. Additionnally, it creates a "summary.csv" file containing the output data in a tabular format. Here also, the script takes two arguments from the terminal.
 
 ````shell
 python postprocessing_nnUNet_predict.py -i /path/to/training/logs -o /path/for/the/output/data
 ````
 
-## 7.2. Retrieve a general Dice score
-By default, nnUNet summarizes the metrics related to the validation in a file called "summary.json". This file contains metrics such the number of false positives (FP), false negatives (FN), true positives (TP) and true negatives (TN) and other metrics such as the Dice Score and the IoU. It is tabulated for the training fold and for each prediction case individually. Note that, by default, the value of "foreground_mean" correspond to the class that was given the label "1" in the ``dataset_info.json``. In our case, these metrics correspond to the soil matrix (see section 1). 
+## 7.2. General Dice score
+For each training fold, nnUNet summarizes the validation metrics in a file called "summary.json". This file stores metrics such as the number of false positives (FP), false negatives (FN), true positives (TP) and true negatives (TN), the Dice Score and the intersection over union (IoU). Those metrics are stored for each training fold and prediction case individually. Note that, by default, the values for the "foreground_mean" class correspond to the class that was given the label "1" in the ``dataset_info.json``. In our case, this corresponds to the soil matrix (see section 1). 
 
  Here also, it might be desirable to obtain validation metrics averaged for all training folds. For this, we created the ``retrieve_dice_score.py`` script. This scripts sums FP, FN, TP and TN of each training folds and calculates a general Dice score, that means, a Dice Score that reflects the overall goodness of the prediction model. You can run the script with the following command:
 
 ````shell
 python retrieve_dice_score.py -i /path/to/summary/files -o /path/for/output/data
 ````
-
 After running the script, the generalized Dice scores for each class are printed in the terminal. Also, a tabular file (.csv) is saved in the directory given after the flag -o. 
+
+# 8. Concluding remarks
+
 
 
 # Foot notes
