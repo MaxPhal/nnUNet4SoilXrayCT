@@ -112,11 +112,11 @@ python make_annotations.py -i /path/to/the/images/to/annotate -o /path/to/where/
 # Example
 python make_annotations.py -i C:\Users\phalempi\Desktop\images -o C:\Users\phalempi\Desktop\annotations -id SPP_P21_SPE_UC193
 ````
-Just a few moment after launching the script, the image name and shape will be printed in the terminal. Afterwards, the GUI of Napari pops up and displays the middle slice of the loaded image. On that middle slice, the soil matrix appears in color (for us 115,  0, 102 in RGB code). 
+Just a few moment after launching the script, the image name and shape will be printed in the terminal. Afterwards, the GUI of Napari pops up and displays the middle slice of the loaded image. On that middle slice, the soil matrix appears in color (for us 115,  0, 102 in RGB code). Note that if annotations are present in the output folder (because you saved but did not finish annotating one image), the previous annotations will be loaded automatically. 
 
 To get familiar with the GUI of Napari, we recommend consulting external resources. There are some very good explanatory videos out there (for instance on YouTube) that show how to efficiently annotate images with Napari. Because a short video is more impactful than thousand words, we won´t go over the procedure in this repository. Note that with the current version of nnUNet at least five annotations are needed. In all cases, we recommend not using less than five annotations.
 
-Once you are done annotating your images, close the Napari GUI and the annotated images will be automatically saved under the path given after the flag -o. Note that if this directory does not exist, it will be created automatically. Before going further with data preparation, make sure to deactivate the current virtual environment.
+Once you are done annotating your images, close the Napari GUI and the annotated images will be automatically saved under the path given after the flag -o. Currently, annotations are automatically saved and previous annotations are overwritten. If this behavior is not desirable for you, you can give an extra argument with the flag "-write". If the value 'no' is used, the annotations will not be saved. Note that if the output directory does not exist, it will be created. Before going further with data preparation, make sure to deactivate the current virtual environment.
 ````
 mamba deactivate
 ````
@@ -384,22 +384,34 @@ After the previous step, your segmentation results are ready in .nii.gz format. 
 python postprocessing_nnUNet_predict.py -i /input/path/to/your/splitted_prediction -o /outpath/to/your/saved_prediction
 ````
 # 7. Log analysis
+In this section, we describe two extra utilities that can be used to extract information on training and validation metrics. These utilities use data from .json and .txt files located in the "nnUNet_results/Dataset<TaskId>_<Name>/nnUNetTrainer_betterIgnoreSampling__nnUNetPlans__3d_fullres/". In this folder, the log results for each training fold are contained in "./fold<X>/training_log....txt" for the metrics during training and in "./fold<X>/validation/summary.json" for the metrics on validation. For ease-of-use, we recommend that you move these files to dedicated folders. You will want to rename the "summary.json" files as they have the same name and your OS will likely complain if you put them in one folder (helps with clarity as well!). In the following sections, we will assume that you have done so. In general, we also recommend that you inspect these files so as to get a better understanding of the output data and its format.
+
 ## 7.1. Retrieve training logs and loss function
+By default, nnUNet creates a figure (called "progress.png") which plots the evolution of the loss function during training and validation. This is done for each training individually. In order to obtain the evolution of the loss function for the whole training procedure, it is necessary to average the loss values for the five training folds. For this, we wrote the ``extract_trainlog.py`` script. This script reads the values "train_loss" and "val_loss" from the "training_log.txt" files, averages them and calculates the standard deviation. It then outputs a single .pdf file containing a plot of the data. Additionnally, it creates a "summary.csv" file which contains the output data in a tabular format. Here also, the script takes two arguments from the terminal.
 
-
+````shell
+python postprocessing_nnUNet_predict.py -i /path/to/training/logs -o /path/for/the/output/data
+````
 
 ## 7.2. Retrieve a general Dice score
+By default, nnUNet summarizes the metrics related to the validation in a file called "summary.json". This file contains metrics such the number of false positives (FP), false negatives (FN), true positives (TP) and true negatives (TN) and other metrics such as the Dice Score and the IoU. It is tabulated for the training fold and for each prediction case individually. Note that, by default, the value of "foreground_mean" correspond to the class that was given the label "1" in the ``dataset_info.json``. In our case, these metrics correspond to the soil matrix (see section 1). 
+
+ Here also, it might be desirable to obtain validation metrics averaged for all training folds. For this, we created the ``retrieve_dice_score.py`` script. This scripts sums FP, FN, TP and TN of each training folds and calculates a general Dice score, that means, a Dice Score that reflects the overall goodness of the prediction model. You can run the script with the following command:
+
+````shell
+python retrieve_dice_score.py -i /path/to/summary/files -o /path/for/output/data
+````
+
+After running the script, the generalized Dice scores for each class are printed in the terminal. Also, a tabular file (.csv) is saved in the directory given after the flag -o. 
 
 
-# Comments
-- **Format of input images:** There is the possibility to start with grayscale images in .mha format. 
-- **Checkpoints during training:** Note that during training, checkpoints are automatically created after 50 epochs. If for whatever reasons a training fold killed by your scheduler, you can resume training from a previously created checkpoint. Therefore, the following command can be used.
+# Foot notes
+- **F1. Checkpoints during training:** Note that during training, checkpoints are automatically created after 50 epochs. If for whatever reasons a training fold killed by your scheduler, you can resume training from a previously created checkpoint. Therefore, the following command can be used.
 
 ````shell
 nnUNetv2_train <TaskID> 3d_fullres <fold> -tr nnUNetTrainer_betterIgnoreSampling --c
 ````
 # Contribution
-
 This repository was drafted by Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HIP). It was reviewed and edited by Steffen Schlüter (UFZ), Maik Geers-Lucas (TUBerlin) and Fabian Isensee (DKFZ, HIP). 
 
 # Acknowledgements
