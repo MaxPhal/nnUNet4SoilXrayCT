@@ -13,9 +13,7 @@ Phalempin, M., Krämer, L., Geers-Lucas, M., Isensee, F., & Schlüter, S. (2024)
 ````
 
 # Philosopy
-The scripts and repository were written assuming (almost) no prerequisite programming experience of the user. Together, we will go in detail into a range of technical aspects, from installing plugins to tapping into the resources of high performance computing (HPC) cluster. We aimed to write codes which are flexible and easy to use. For most scripts, you will have to adjust a few file paths only. In most cases, these filepaths are given from the terminals so that you won´t even have to edit the scripts themselves. 
-
-We hope that this philosophy and the level of details of this document will help many X-ray CT enthousiasts getting onto the deep learning boat. We also hope you will find this repository helpful. Feel free to contact us if you want to share your experience using nnUNet on your X-ray CT images of soil samples.
+The scripts and repository were written assuming (almost) no prerequisite programming experience of the user. Together, we will go in detail into a range of technical aspects, from installing plugins to tapping into the resources of high performance computing (HPC) cluster. We aimed to write codes which are flexible and easy to use. For most scripts, you will have to adjust a few file paths only. In most cases, these filepaths are given from the terminals so that you won´t even have to edit the scripts themselves. We hope that this philosophy and the level of details of this document will help many X-ray CT enthousiasts getting onto the deep learning boat.
 
 <!-- We are aware that the fluidity of the code could have been improved. On some occasions even, a few file format conversion are superfluous. On purpose, we chose to go for redundancy instead of modifying the native code of nnUNet. -->
 
@@ -404,8 +402,9 @@ python retrieve_dice_score.py -i /path/to/summary/files -o /path/for/output/data
 After running the script, the generalized Dice scores for each class are printed in the terminal. Also, a tabular file (.csv) is saved in the directory given after the flag -o. 
 
 # 8. Concluding remarks
+If everything ran smoothly, you should now have some nnUNet predictions for your dataset, along with all the necessary data for potential publication, including figures and relevant metrics. 
 
-
+We hope you found this repository helpful. If so, do not forget to cite the appropriate citations to acknowledge the efforts put in writing this repository. Feel free to contact us if you want to share your experience using nnUNet on your X-ray CT images of soil samples. 
 
 # Foot notes
 - **F1. Checkpoints during training:** Note that during training, checkpoints are automatically created after 50 epochs. If for whatever reasons a training fold killed by your scheduler, you can resume training from a previously created checkpoint. Therefore, the following command can be used.
