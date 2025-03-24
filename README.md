@@ -394,7 +394,7 @@ In this section, we describe two extra utilities that can be used to extract inf
 By default, nnUNet creates a figure (called "progress.png") which plots the evolution of the loss function during training and validation. This is done for each fold individually. In order to obtain the evolution of the loss function for the whole training procedure, it is necessary to average the loss values for the five folds. To do this, we wrote the ``extract_trainlog.py`` script. This script reads the values "train_loss" and "val_loss" from the "training_log.txt" files, averages them and calculates the standard deviation. It then outputs a single .pdf file containing a plot of the data. Additionnally, it creates a "summary.csv" file containing the output data in a tabular format. Here also, the script takes two arguments from the terminal.
 
 ````shell
-python postprocessing_nnUNet_predict.py -i /path/to/training/logs -o /path/for/the/output/data
+python extract_trainlog.py -i /path/to/training/logs -o /path/for/the/output/data
 ````
 
 ## 7.2. General Dice score
@@ -403,9 +403,9 @@ For each training fold, nnUNet summarizes the validation metrics in a file calle
  Here also, it might be desirable to obtain validation metrics averaged for all training folds. For this, we created the ``retrieve_dice_score.py`` script. This scripts sums FP, FN, TP and TN of each training folds and calculates a general Dice score, that means, a Dice Score that reflects the overall goodness of the prediction model. You can run the script with the following command:
 
 ````shell
-python retrieve_dice_score.py -i /path/to/summary/files -o /path/for/output/data
+python retrieve_dice_score.py -i /path/to/summary/files
 ````
-After running the script, the generalized Dice scores for each class are printed in the terminal. Also, a tabular file (.csv) is saved in the directory given after the flag -o. 
+Note that this script retrieves the label from the ``dataset_info.json`` file, so make that you set your working directory to the path containing that file. After running the script, a tabular file containing the aggregated metrics (``aggregated_metrics.csv``) is written in the current working directory. 
 
 # 8. Concluding remarks
 If everything ran smoothly, you should now have some nnUNet predictions for your dataset, along with all the necessary data for potential publication, including figures and relevant metrics. 
