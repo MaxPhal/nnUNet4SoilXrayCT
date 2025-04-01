@@ -420,7 +420,7 @@ nnUNetv2_train <TaskID> 3d_fullres <fold> -tr nnUNetTrainer_betterIgnoreSampling
 -->
 
 # Contribution
-This repository was drafted by Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HIP). It was reviewed and edited by Steffen Schlüter (UFZ), Maik Geers-Lucas (TUBerlin) and Fabian Isensee (DKFZ, HIP). 
+This repository was drafted by Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HI). It was reviewed and edited by Steffen Schlüter (UFZ), Maik Geers-Lucas (TUBerlin) and Fabian Isensee (DKFZ, HI). 
 
 # Acknowledgements
 Part of this work was funded by Helmholtz Imaging (HI), a platform of the Helmholtz Incubator. 
