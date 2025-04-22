@@ -174,7 +174,7 @@ Open the \_\_path__.py file (from this repository) with a text editor and adapt 
 ## 3.2. Data conversion
 This step takes the image and annotation files from two given folders, processes them and saves them as .nii.gz in the nnUNet_raw folder. Here, you have to keep in mind that our workflow works in a "folder-based" manner. This means that all images should be in one folder and all annotations should be in another one. 
 
-Data conversion entails converting the input files to .nii.gz, handling the ignore label in the annotations, cropping images and annotations to the relevant parts, normalizing the image crops and putting everything into the nnUNet format (adhering to nnUNets naming conventions of folders and files). During this step, data is normalized according to four possible methods:
+Data conversion entails converting the input files to .nii.gz, handling the ignore label in the annotations, cropping images and annotations to the relevant parts, normalizing the image crops and putting everything into the nnUNet format (adhering to nnUNets naming conventions of folders and files). During this step, data is normalized according to three possible methods:
 
 - *noNorm*: no normalization is done
 - *zscore*: normalize by mean and std: ```(img - mean) / std``` (this is the nnUNet default method)
