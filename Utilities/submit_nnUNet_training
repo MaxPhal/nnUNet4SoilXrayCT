@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #SBATCH --job-name=nnunet_training  
-#SBATCH --chdir=/work/phalempi      # modify with your paths
-#SBATCH --output=/work/%u/%x-%j.log
+#SBATCH --chdir=/work/phalempi         # modify with your paths
+#SBATCH --output=/work/%u/%x-%A-%a.log # give name and filepath for the .log file (console output)
 #SBATCH --time=1080                 # modify with your time limit
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
