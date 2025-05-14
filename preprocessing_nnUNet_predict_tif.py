@@ -44,7 +44,7 @@ def convert_hdr_to_nii_normalize(input_dir: str,norm_type:str) -> None:
 
 if __name__ == "__main__":
     """
-    This script convert each image file in the input folder from .mha to .nii.gz, normalizes the
+    This script convert each image file in the input folder from .tif to .nii.gz, normalizes the
     image and saves it to the the output folder
     """
     parser = argparse.ArgumentParser()

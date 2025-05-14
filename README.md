@@ -9,7 +9,7 @@ In this repository, we provide detailed explanations on how to transition from 3
 Isensee, F., Jaeger, P. F., Kohl, S. A., Petersen, J., & Maier-Hein, K. H. (2021). nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation. Nature methods, 18(2), 203-211. https://doi.org/10.1038/s41592-020-01008-z
 ````
 ````
-Phalempin, M., Krämer, L., Geers-Lucas, M., Isensee, F., & Schlüter, S. (2024). Advanced segmentation of soil constituents in X-ray CT images using nnUNet. Authorea Preprints. https://doi.org/10.22541/essoar.173395846.68597189/v1
+Phalempin, M., Krämer, L., Geers-Lucas, M., Isensee, F., & Schlüter, S. (2025). Deep learning segmentation of soil constituents in 3D X-ray CT images. Geoderma. 458, 117321. https://doi.org/10.1016/j.geoderma.2025.117321
 ````
 
 # Philosopy

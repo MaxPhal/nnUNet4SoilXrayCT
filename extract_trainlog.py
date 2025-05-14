@@ -62,22 +62,23 @@ class TrainingLogProcessor:
         mean_val_loss = summary[("val_loss", "mean")]
         std_val_loss = summary[("val_loss", "std")]
         
-        plt.figure(figsize=(8, 5))
+        plt.figure(figsize=(6.5, 5))
         sns.set(style="ticks")
         sns.set_context("paper", font_scale=1.75)
         plt.rcParams["font.family"] = "Arial"
         
-        sns.lineplot(x=epochs, y=mean_train_loss, label="Train Loss", color="blue")
-        plt.fill_between(epochs, mean_train_loss - std_train_loss, mean_train_loss + std_train_loss, color="blue", alpha=0.2)
+        sns.lineplot(x=epochs, y=mean_train_loss, label="Train Loss", color=sns.color_palette(palette='Set2')[1])
+        plt.fill_between(epochs, mean_train_loss - std_train_loss, mean_train_loss + std_train_loss, color=sns.color_palette(palette='Set2')[1], alpha=0.2)
         
-        sns.lineplot(x=epochs, y=mean_val_loss, label="Validation Loss", color="red")
-        plt.fill_between(epochs, mean_val_loss - std_val_loss, mean_val_loss + std_val_loss, color="red", alpha=0.2)
+        sns.lineplot(x=epochs, y=mean_val_loss, label="Validation Loss", color=sns.color_palette(palette='Set2')[2])
+        plt.fill_between(epochs, mean_val_loss - std_val_loss, mean_val_loss + std_val_loss, color=sns.color_palette(palette='Set2')[2], alpha=0.2)
         
         plt.yticks(np.arange(-1, 1.25, 0.5))      
+        plt.ylim(-1, 1)
         plt.xlabel("Number of Epochs")
         plt.ylabel("Loss")
         plt.legend()
-        plt.savefig(os.path.join(output_folder, 'training_plots.pdf'), format="pdf", dpi=300, bbox_inches='tight')
+        plt.savefig(os.path.join(output_folder, 'training_plots.svg'), format="svg", bbox_inches='tight', transparent = True)
         plt.show()
 
 def main():
@@ -85,7 +86,7 @@ def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Script to process training logs and generate plots.')
     parser.add_argument('-i', type=Path, required=True, help='Path to the input directory where training logs are stored')
-    parser.add_argument('-o', type=Path, required=True, help='Path to the output directory where training logs are stored')
+    parser.add_argument('-o', type=Path, required=True, help='Path to the output directory where output files will be saved -- Should be different from input directory')
     parser.add_argument('-v', action='store_true', help='Increase output verbosity')
     args = parser.parse_args()
 
@@ -97,6 +98,7 @@ def main():
     # Save summary and plot results
     processor.save_summary(summary, args.o)
     processor.plot_results(summary, args.o)
+    print(f"Training plot saved to {args.o}")
 
 if __name__ == "__main__":
     main()
