@@ -135,7 +135,7 @@ mamba create -n venv-nnunet python=3.11 && conda activate venv-nnunet
 ### 3.1.2. Install git <!-- Successful on BOPHY116 -->
 Git is a version control system that helps track changes in code and collaborate on projects. Git can also be used to download code as it allows users to clone repositories from remote servers (e.g., GitHub, GitLab, Bitbucket). Here, we are using git to download the nnUNet repository from GitHub. To install git, type the following command in your terminal.
 ````shell
-mamba install git
+conda install git
 ````
 ### 3.1.3. Install nnUNet <!-- Successful on BOPHY116 -->
 nnUNet is a self-configuring deep learning framework for medical image segmentation. It automatically adapts to new datasets by optimizing preprocessing, network architecture, and training settings, making it a powerful and user-friendly tool for segmentation tasks. More information on nnUNet can be found [here](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/installation_instructions.md#installation-instructions). To install nnUNet, enter the following commands: 
@@ -199,7 +199,7 @@ The TaskID parameter is the one you defined in ``dataset_info.json``. The -np an
 
 # 4. High Performance Computer cluster
 ## 4.1. Introduction
-Let´s briefly describe what HPC clusters are to put everyone on the same level. An HPC cluster is a system made up of multiple interconnected computers (often called nodes) that work together to perform complex computations. These clusters are designed to handle tasks that require a large amount of computational power, such as scientific simulations, data analysis, machine learning, or rendering. Most HPC clusters run on Linux due to its stability, scalability, and open-source nature. HPC clusters typically use a job scheduler (like SLURM) to allocate resources and manage the execution of computational tasks across the nodes. For the rest of this example, we will assume that you also dispose of a cluster running on Linux with a SLURM job scheduler (this is actually the case for many of the HPC clusters out there).
+Let´s briefly describe what HPC clusters are to put everyone on the same level. An HPC cluster is a system made up of multiple interconnected computers (often called nodes) that work together to perform complex computations. These clusters are designed to handle tasks that require a large amount of computational power, such as scientific simulations, data analysis, machine learning, or rendering. Most HPC clusters run on Linux due to its stability, scalability, and open-source nature. HPC clusters typically use a job scheduler (like SLURM) to allocate resources and manage the execution of computational tasks across the nodes. For the rest of this example, we will assume that you also dispose of a cluster running on Linux with a SLURM job scheduler (this is actually the case for many of the HPC clusters out there). 
 
 ## 4.2. Connecting to your HPC Cluster
 How you connect to your HPC Cluster mostly depends on the infrastructure and softwares available in your university or research institution. At the UFZ, we use softwares with GUIs, although we are aware that SSH connection is usually more convenient. For this, we use FileZilla to transfer local files to a remote server. We also use X2GO client to connect to the head node of the cluster and send jobs across the cluster. We recommend that you contact your IT administrator to figure out what is the easiest solution for you. In the following, we will assume that you got these steps right and that you could successfully connect to your HPC Cluster.
@@ -216,10 +216,15 @@ While requesting resources from your cluster, you have to bear in mind a few asp
 
 ## 4.5. Setting up your HPC Cluster
 ### 4.5.1. Setting  up a virtual environment
-Because we are now physically using another computer (the cluster), we have to create (again) a new virtual environment for nnUNet. Since the cluster runs on Linux OS, the command to create a virtual environment slightly differ. Here is an example:
+Because we are now physically using another computer (the cluster), we have to create (again) a new virtual environment for nnUNet. Note that nnUNet (version 2.7.0) requires at least Python 3.10. Depending on the Python version used by default on your cluster, you might need to force it to use Python 3.10 or higher. On the EVE cluster, this is done with the following command. 
 
 ````shell
-python -m venv /home/username/venv-nnunet
+module load foss/2022b python 3.10.8 
+````
+We then create the virtual environment with: 
+
+````shell
+python3.10 -m venv /home/username/venv-nnunet
 ````
 where "username" is your login name and "venv-nnunet" is the name of your virtual environment. Here we used venv-nnunet to be consistent with the previous naming.
 
