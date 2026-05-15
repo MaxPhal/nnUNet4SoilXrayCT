@@ -269,6 +269,9 @@ In the shell file, modify the parameters related to your job submission. These p
 #SBATCH --mail-type=BEGIN,END          # request notifications upon starting and ending the job
 #SBATCH -G nvidia-a100:1               # request specifically a NVIDIA A100 
 
+###  Loading Python 3.10.8
+module load foss/2022b Python/3.10.8
+
 ###  activating  the virtual environment
 source /home/username/venv-nnunet/bin/activate                       # modify according to your path 
 ## declaring the environment variable
