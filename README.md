@@ -219,7 +219,7 @@ While requesting resources from your cluster, you have to bear in mind a few asp
 Because we are now physically using another computer (the cluster), we have to create (again) a new virtual environment for nnUNet. Note that nnUNet (version 2.7.0) requires at least Python 3.10. Depending on the Python version used by default on your cluster, you might need to force it to use Python 3.10 or higher. On the EVE cluster, this is done with the following command. 
 
 ````shell
-module load foss/2022b python 3.10.8 
+module load foss/2022b Python/3.10.8
 ````
 We then create the virtual environment with: 
 
