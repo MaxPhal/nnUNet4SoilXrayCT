@@ -197,6 +197,16 @@ nnUNetv2_plan_and_preprocess -d 777 -c 3d_fullres -np 4 -npfp 4
 ````
 The TaskID parameter is the one you defined in ``dataset_info.json``. The -np and -npfp parameters define how many processes are used during the preprocessing.  A higher number means that the preprocessing is faster but more RAM is consumed, while lower numbers mean that less RAM is needed but the processing takes longer. You can play around with these parameters; for us 4 worked well. Now that your data abides to the nnUNet format and are preprocessed, the training process can start. But first, let´s have a few words on HPC clusters.
 
+Note that it is possible to optimize experiment planning according to your computing resources, beyond nnUNet´s default planning. This can be done as follows.
+
+````shell
+nnUNetv2_plan_experiment -d <TaskID> -c 3d_fullres -gpu_memory_target <VRAM.GPU> -overwrite_plans_name <name.of.custom.plans>
+
+# Example
+nnUNetv2_plan_experiment -d 777 -pl nnUNetPlannerResEncM -gpu_memory_target 80 -overwrite_plans_name nnUNetResEncUNetPlans_80G
+````
+In this example, the nnUNet planner will be optimized to use a GPU memory target of 80 GB of VRAM. Since the resulting batch size and patch size will be modified accordingly, this will impact your segmentation results! For more information, please refer to this [link](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/resenc_presets.md). 
+
 # 4. High Performance Computer cluster
 ## 4.1. Introduction
 Let´s briefly describe what HPC clusters are to put everyone on the same level. An HPC cluster is a system made up of multiple interconnected computers (often called nodes) that work together to perform complex computations. These clusters are designed to handle tasks that require a large amount of computational power, such as scientific simulations, data analysis, machine learning, or rendering. Most HPC clusters run on Linux due to its stability, scalability, and open-source nature. HPC clusters typically use a job scheduler (like SLURM) to allocate resources and manage the execution of computational tasks across the nodes. For the rest of this example, we will assume that you also dispose of a cluster running on Linux with a SLURM job scheduler (this is actually the case for many of the HPC clusters out there). 
@@ -268,6 +278,7 @@ In the shell file, modify the parameters related to your job submission. These p
 #SBATCH --mem-per-cpu=60G              # memory allocated per CPU. 
 #SBATCH --mail-type=BEGIN,END          # request notifications upon starting and ending the job
 #SBATCH -G nvidia-a100:1               # request specifically a NVIDIA A100 
+#SBATCH --constraint a100-vram-80G     # request a NVIDIA A100 with 80G VRAM. 
 
 ###  Loading Python 3.10.8
 module load foss/2022b Python/3.10.8
@@ -280,7 +291,13 @@ export nnUNet_results="/work/phalempi/nnUNet_results"                # modify ac
 
 ## run nnUNet training command (see section 2.3)
 nnUNetv2_train 777 3d_fullres $SLURM_ARRAY_TASK_ID -tr nnUNetTrainer_betterIgnoreSampling # replace "777" by your TaskID
+
+## If you used a non-default ExperimentPlanner, you need to specify it in the command as such: 
+# nnUNetv2_train 777 3d_fullres $SLURM_ARRAY_TASK_ID -tr nnUNetTrainer_betterIgnoreSampling -p nnUNetResEncUNetPlans_80G
 ````
+
+Note that, with the last #SBATCH command, we constrain the use of A100s with 80G VRAM. This is due to the fact that the EVE cluster hosts several A100 GPUs with different VRAM capacities (i.e., 40 GB or 80GB). Since we have optimized the experiment for a target GPU memory of 80 GB (see section 3.3), we need to make sure to exclude GPUS with <80 GB of VRAM. Having the same GPUs with different VRAM is most likely a unique feature of the EVE cluster of the UFZ, so GPU VRAM constraining might not be relevant in your case. Still, it might be convenient to know about this possibility. 
+
 In order to run training folds simultaneously, we have to create a so-called "array job". Job arrays allow to use SLURM's ability to create multiple jobs from one script. For example, instead of having five submission scripts to run the same job step with different arguments, we can have one script to run the five job steps at once. This allows to leverage the cluster´s ability to process images simulateneously (x GPUs process x training fold at the same time). After adjusting #SBATCH arguments and filepaths, submit the shell script as an array job using the following command. 
 
 ````shell
@@ -348,6 +365,10 @@ To run predictions with an array job, modify the shell script ``submit_nnUNet_in
 #SBATCH --mem-per-cpu=60G
 #SBATCH --mail-type=BEGIN,END
 #SBATCH -G nvidia-a100:1
+#SBATCH --constraint a100-vram-80G
+
+###  Loading Python 3.10.8
+module load foss/2022b Python/3.10.8
 
 ##  activating  the virtual environment
 source  /home/username/venv/bin/activate         # modify according to your path
@@ -371,6 +392,9 @@ done
 
 ## Run inference with nnUNet native command
 nnUNetv2_predict -i "$folder_path_in"/"${file_list[$SLURM_ARRAY_TASK_ID]}" -o "$folder_path_out" -d 777 -tr nnUNetTrainer_betterIgnoreSampling -c 3d_fullres
+
+## If you used a non-default ExperimentPlanner, you need to specify it in the command as such: 
+#nnUNetv2_predict -i "$folder_path_in"/"${file_list[$SLURM_ARRAY_TASK_ID]}" -o "$folder_path_out" -d 777 -tr nnUNetTrainer_betterIgnoreSampling -c 3d_fullres -p nnUNetResEncUNetPlans_80G
 ````
 Also make sure to replace the argument given after the flag -d with the name of your TaskID. To submit the array job, use the following command:
 
@@ -427,8 +451,23 @@ nnUNetv2_train <TaskID> 3d_fullres <fold> -tr nnUNetTrainer_betterIgnoreSampling
 ````
 -->
 
+# A few useful commands
+When working with Python, nnUNet and terminal prompting in general, there is a few useful commands that are convenient to know. Those are listed below. 
+
+````shell
+pip show <software>
+# Example
+pip show nnunetv2 # This can be useful to check software versions and make sure that your cluster and workstation are running the same nnUNet versions
+````
+
+````shell
+<nnunet.native.command> --help 
+# Example
+nnUNetv2_train --help # This command displays all possible arguments that a nnUNet native command can take. It is very useful and we recommend to use it for all commonly used nnUNet commands!  
+````
+
 # Contribution
-This repository was drafted by Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HI). It was reviewed and edited by Steffen Schlüter (UFZ), Maik Geers-Lucas (TUBerlin) and Fabian Isensee (DKFZ, HI). 
+This repository was drafted by Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HI). It was reviewed and edited by Steffen Schlüter (UFZ), Maik Geers-Lucas (TUBerlin) and Fabian Isensee (DKFZ, HI). It is currently being maintained by Maxime Phalempin (UFZ, AU).
 
 # Acknowledgements
 Part of this work was funded by Helmholtz Imaging (HI), a platform of the Helmholtz Incubator. 
