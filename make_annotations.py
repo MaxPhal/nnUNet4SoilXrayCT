@@ -33,13 +33,25 @@ def apply_threshold(grayscale_data):
     return annotations
 
 def normalize_colors(metadata):
-    color_dict = {int(k): tuple(v) for k, v in metadata["colors"].items()}
-    return {k: np.array(v) / 255 for k, v in color_dict.items()}
+    color_dict = {}
+    for k, v in metadata["colors"].items():
+        rgba = np.append(np.array(v) / 255.0, 1.0)
+        color_dict[int(k)] = rgba
+        #print(f"Class {k} color normalized to RGBA: {rgba}")
+    return color_dict
 
 def visualize_data(grayscale_data, annotations, color_dict):
     viewer = napari.Viewer()
     viewer.add_image(grayscale_data, name='Grayscale data')
-    viewer.add_labels(annotations, name="Annotations", color=color_dict, opacity=1, blending='additive')
+    label_layer = viewer.add_labels(
+        annotations,
+        name="Annotations",
+        colormap=color_dict,
+        opacity=1,
+        blending='additive'
+    )
+    label_layer.color = color_dict
+    #print(label_layer.color)
     napari.run()
 
 def save_annotations(output_path, sample_id, annotations):
@@ -49,7 +61,6 @@ def save_annotations(output_path, sample_id, annotations):
     print(f"Annotations saved to {output_file}")
 
 def main():
-
     # Parsing arguments from command line
     parser = argparse.ArgumentParser(description='This is script to prepare ground truth annotations using Napari.')
     parser.add_argument('-i', type=Path, required=True, help='Path to the input directory')
@@ -67,8 +78,10 @@ def main():
         annotations = load_annotations(args.o, args.id)
     else:   
         annotations = apply_threshold(grayscale_data)
+    
     metadata = load_metadata(Path.cwd() / 'dataset_info.json')
     color_dict = normalize_colors(metadata)
+
     visualize_data(grayscale_data, annotations, color_dict)
 
     # saving annotations if user wants to
