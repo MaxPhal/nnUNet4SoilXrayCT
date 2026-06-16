@@ -12,7 +12,9 @@ Isensee, F., Jaeger, P. F., Kohl, S. A., Petersen, J., & Maier-Hein, K. H. (2021
 Phalempin, M., Krämer, L., Geers-Lucas, M., Isensee, F., & Schlüter, S. (2025). Deep learning segmentation of soil constituents in 3D X-ray CT images. Geoderma. 458, 117321. https://doi.org/10.1016/j.geoderma.2025.117321
 ````
 
-# Philosopy
+Let me change something to see what happens! 
+
+# Philosopy 
 The scripts and repository were written assuming (almost) no prerequisite programming experience of the user. Together, we will go in detail into a range of technical aspects, from installing plugins to tapping into the resources of high performance computing (HPC) cluster. We aimed to write codes which are flexible and easy to use. For most scripts, you will have to adjust a few file paths only. In most cases, these filepaths are given from the terminal. We hope that this philosophy and level of details of this document will help you get onto the deep learning boat for your image processing tasks.
 
 <!-- We are aware that the fluidity of the code could have been improved. On some occasions even, a few file format conversion are superfluous. On purpose, we chose to go for redundancy instead of modifying the native code of nnUNet. -->
