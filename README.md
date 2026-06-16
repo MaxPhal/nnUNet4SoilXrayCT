@@ -13,7 +13,7 @@ Phalempin, M., Krämer, L., Geers-Lucas, M., Isensee, F., & Schlüter, S. (2025)
 ````
 
 # Philosopy
-The scripts and repository were written assuming (almost) no prerequisite programming experience of the user. Together, we will go in detail into a range of technical aspects, from installing plugins to tapping into the resources of high performance computing (HPC) cluster. We aimed to write codes which are flexible and easy to use. For most scripts, you will have to adjust a few file paths only. In most cases, these filepaths are given from the terminals. We hope that this philosophy and the level of details of this document will help you get onto the deep learning boat for your image processing tasks.
+The scripts and repository were written assuming (almost) no prerequisite programming experience of the user. Together, we will go in detail into a range of technical aspects, from installing plugins to tapping into the resources of high performance computing (HPC) cluster. We aimed to write codes which are flexible and easy to use. For most scripts, you will have to adjust a few file paths only. In most cases, these filepaths are given from the terminal. We hope that this philosophy and level of details of this document will help you get onto the deep learning boat for your image processing tasks.
 
 <!-- We are aware that the fluidity of the code could have been improved. On some occasions even, a few file format conversion are superfluous. On purpose, we chose to go for redundancy instead of modifying the native code of nnUNet. -->
 
@@ -26,7 +26,7 @@ Before getting down to business, let´s define a few terms to avoid potential co
 - Annotation: one single (.tif, .mha or .nii.gz) file which contains the labelled classes - Created by you
 - Prediction: one single (.tif, .mha or .nii.gz) file which contains the labelled classes - Created by nnUNet
 - Mask: a separate image that defines which voxels belong to specific classes (or labels). Masks can be binary if only background and foregound are of intestest or grayscale for multiclass segmentation. Essentially, an annotation file is also a mask and both words can be used interchangeably in this documentation.  
-- Image crops: an image that was cropped from a bigger image (in terms of size). "Subvolumes" or "cutouts" are synonims of "image crops". 
+- Image crops: an image that was cropped from a bigger image (in terms of size). "Subvolumes" or "cutouts" are synonyms of "image crops". 
 
 # Workflow
 Our workflow includes several crucial steps such as image annotation, conversion, preprocessing, model training, inference and analysis of the output data (Figure 1). The workflow was mainly developed in Python. It uses several scripts (steps in italic font on figure 1) that create annotations and convert the images to nnUNet-friendly formats, before processing using the native nnUNet pipeline (steps in bold font on figure 1). 
@@ -82,7 +82,7 @@ It is important to note that the label "0" should always be the class "ToPredict
 Miniforge is a lightweight version of Anaconda that helps install and manage Python and other software packages efficiently. It is designed for flexibility and supports open-source package management with Conda, making it ideal for scientific computing and data analysis. We recommend the distribution [Miniforge](https://github.com/conda-forge/miniforge#miniforge3). For ease-of-use, it is recommended to install it for your use only and not add Conda to the PATH variable during installation.
 
 ### 2.1.2. Create a virtual environment <!-- Successful on BOPHY116 -->
-When working with Python, we often rely on various plugins and software libraries that need to be well-organized. One effective way to manage them is by using Conda environments. A Conda environment functions like a virtual workspace or isolated system, accessible through the terminal. Software installed within one Conda environment remains separate and may not be available in others. Please use the following command in your Miniforge terminal to create a virtual environment.
+When working with Python, we often rely on various plugins and software libraries that need to be well-organized. One effective way to manage them is by using Conda environments. A Conda environment functions like a virtual workspace or isolated system, accessible through the terminal. Softwares installed within one Conda environment remain separate and may not be available in others. Please use the following command in your Miniforge terminal to create a virtual environment.
 ````shell
 mamba create -n venv-napari python=3.11
 ````
@@ -107,7 +107,7 @@ To create representative ground truth datasets, it is important to select subvol
 **IMPORTANT**: The selected images for ground truth generation should be in a 3D .tif file format.  
 
 ## 2.3. Image annotation
-For image annotation, we developed a strategy that minimizes annotation efforts while still ensuring that all relevant classes are captured. This strategy relies on dense annotations of one slice and on sparse annotations for other interesting classes within a stack (see figure 2 in our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1)). To perform dense annotations, the middle slice of the stack is segmented with Otsu thresholding to isolate the soil matrix and it is manually annotated for the other classes. 
+For image annotation, we developed a strategy that minimizes annotation efforts while still ensuring that all relevant classes are captured. This strategy relies on dense annotations of one slice and sparse annotations for other interesting classes within a stack (see figure 2 in our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1)). To perform dense annotations, the middle slice of the stack is segmented with Otsu thresholding to isolate the soil matrix and it is manually annotated for the other classes. 
 
 To do so in a semi-automatic manner, we created the `make_annotations.py` script. This script takes three arguments, i.e., the input folder path (the path to the folder containing the images that you want to annotate), the output folder path (the path to the folder where the annotations will be saved; if the folder does not exists, it will be created automatically) and the sample ID (the name of your 3D tif image, without its extension). These arguments are passed from the command terminal with three flags, i.e., "-i", "-o" and "-id", respectively.   
 
@@ -220,7 +220,7 @@ There are several locations on which data can be stored on a HPC cluster. The ap
 Note that not all HPC clusters have exactly the same directory structure and nomenclature, but many follow a similar convention like the aforementionned one. Here again, contact your IT administrator to find out the best data storage options for your data. 
 
 ## 4.4. Requesting resources from your HPC Cluster
-While requesting resources from your cluster, you have to bear in mind a few aspects. One of the most important one is the maximum runtime of jobs. It specifies a time limit that a running job cannot exceed. If the job exceeds the requested time, it will be killed automatically by the scheduler. The same applies for the requested memory per cpu. It is a good practice to optimize these parameters to avoid exceeding the job requirements, but to keep them as low as possible so that the scheduler grants resources quicker. 
+While requesting resources from your cluster, you have to bear in mind a few aspects. One of the most important one is the maximum runtime of jobs. It specifies a time limit that a running job cannot exceed. If the job exceeds the requested time, it will be killed automatically by the scheduler. The same applies for the requested memory per cpu. It is a good practice to optimize these parameters to avoid exceeding job requirements, but to keep them as low as possible so that the scheduler grants resources quicker. 
 
 <!-- FOR UFZ Users: Note also that GPU Nodes only have a maximum of 470GB RAM available. This means that the total amount of RAM (calculated as cpus-per-task * mem-per-cpu) has to be inferior to 470GB -->  
 
@@ -298,7 +298,7 @@ nnUNetv2_train 777 3d_fullres $SLURM_ARRAY_TASK_ID -tr nnUNetTrainer_betterIgnor
 
 Note that, with the last #SBATCH command, we constrain the use of A100s with 80G VRAM. This is due to the fact that the EVE cluster hosts several A100 GPUs with different VRAM capacities (i.e., 40 GB or 80GB). Since we have optimized the experiment for a target GPU memory of 80 GB (see section 3.3), we need to make sure to exclude GPUS with <80 GB of VRAM. Having the same GPUs with different VRAM is most likely a unique feature of the EVE cluster of the UFZ, so GPU VRAM constraining might not be relevant in your case. Still, it might be convenient to know about this possibility. 
 
-In order to run training folds simultaneously, we have to create a so-called "array job". Job arrays allow to use SLURM's ability to create multiple jobs from one script. For example, instead of having five submission scripts to run the same job step with different arguments, we can have one script to run the five job steps at once. This allows to leverage the cluster´s ability to process images simulateneously (x GPUs process x training fold at the same time). After adjusting #SBATCH arguments and filepaths, submit the shell script as an array job using the following command. 
+In order to run training folds simultaneously, we have to create a so-called "array job". Job arrays allow to use SLURM's ability to create multiple jobs from one script. For example, instead of having five submission scripts to run the same job step with different arguments, we can have one script to run the five job steps at once. This allows to leverage the cluster´s ability to process images simulateneously (x GPUs process x training fold at the same time). After adjusting #SBATCH arguments and filepaths, submit the shell script as an array job using the following command. For more information on available sbatch commands, you are refered to the [SLURM official website][https://slurm.schedmd.com/sbatch.html#OPT_constraint]
 
 ````shell
 sbatch -a 0-4 submit_nnunet_training.sh 
