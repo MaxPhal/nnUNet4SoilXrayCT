@@ -7,7 +7,7 @@ import nibabel as nib
 import numpy as np
 from tqdm import tqdm
 
-from preprocessing_nnUNet_train import img_normalize, convert_tif_to_hdr
+from prepare_raw_data import img_normalize, convert_tif_to_hdr
 
 def convert_hdr_to_nii_normalize(input_dir: str,norm_type:str) -> None:
     """

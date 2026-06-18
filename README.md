@@ -39,7 +39,9 @@ Our workflow includes several crucial steps such as image annotation, conversion
 
 Our workflow relies on the use of HPC cluster to perform computionnally demanding tasks such as training and inference. We highly recommend you do the same because GPUs are so much faster than CPUs. Also, we developed this workflow in a way that several GPUs can work in parallel on several cutouts of the same image. This feature allows increased processing speed, which makes it highly competitive, even against less computationally demanding segmentation methods. 
 
-If your university or research institution does not offer access to a HPC cluster, consider relying on dedicated GPU Servers that can be rented. For processing tasks that rely on CPUs only, we recommend using a regular workstation. Here, we used a workstation running on Windows (64-bit, Intel(R) Xeon(R) Gold 6142 CPU and 192 GB RAM) for CPU tasks only. For GPU tasks only, we used the [EVE cluster](https://www.ufz.de/index.php?en=51499). The EVE cluster is a HPC cluster maintained by the UFZ and which hosts several NVIDIA A100. 
+If your university or research institution does not offer access to a HPC cluster, consider relying on dedicated GPU Servers that can be rented. For processing tasks that rely on CPUs only, we recommend using a regular workstation(*). Here, we used a workstation running on Windows (64-bit, Intel(R) Xeon(R) Gold 6142 CPU and 192 GB RAM) for CPU tasks only. For GPU tasks, we used the [EVE cluster](https://www.ufz.de/index.php?en=51499). The EVE cluster is a HPC cluster maintained by the UFZ and which hosts several NVIDIA A100. 
+
+** *Note (18/06/2026): ** We have now also moved the whole workflow to HPC in order to drastically increase processing speed. You can now perform steps 3.2 (Prepare raw data) and 3.3 (planning and preprocessing) on the HPC using the scripts ```submit_prepare_raw_data.sh``` and ```submit_nnUNet_preprocessing.sh``` located in the "Utilities" folder. 
 
 # 1.  Provide dataset information
 The first step of the workflow is to provide some parameters and informations in the ```dataset_info.json``` file. In this file, set the TaskID as any three digit number of your choice, choose a meaningul name for your dataset and a normalization method (more on that later in the documentation, for now you can leave it as is). Set the labels according to the classes of interest that you want to segment. Finally, set a RGB code that defines how each class will be displayed during the annotation of your images. Below, we show the class definition that we used for the Dataset 1 (see our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1) for more information).
@@ -171,7 +173,7 @@ Open the \_\_path__.py file (from this repository) with a text editor and adapt 
 3) the path to the images of your training data (input_dir_images) # IMPORTANT: images should be in 3D stack .tif format
 4) the path to your annotations (input_dir_masks) # IMPORTANT: annotations should already be in 3D stack .tif format if you used `make_annotations.py` to generate the annotations
 
-## 3.2. Data conversion
+## 3.2. Prepare raw data
 This step takes the image and annotation files from two given folders, processes them and saves them as .nii.gz in the nnUNet_raw folder. Here, you have to keep in mind that our workflow works in a "folder-based" manner. This means that all images should be in one folder and all annotations should be in another one. 
 
 Data conversion entails converting the input files to .nii.gz, handling the ignore label in the annotations, cropping images and annotations to the relevant parts, normalizing the image crops and putting everything into the nnUNet format (adhering to nnUNets naming conventions of folders and files). During this step, data is normalized according to three possible methods:
@@ -203,9 +205,9 @@ Note that it is possible to optimize experiment planning according to your compu
 nnUNetv2_plan_experiment -d <TaskID> -c 3d_fullres -gpu_memory_target <VRAM.GPU> -overwrite_plans_name <name.of.custom.plans>
 
 # Example
-nnUNetv2_plan_experiment -d 777 -pl nnUNetPlannerResEncM -gpu_memory_target 80 -overwrite_plans_name nnUNetResEncUNetPlans_80G
+nnUNetv2_plan_experiment -d 777 -pl nnUNetPlannerResEncM -gpu_memory_target 80 -overwrite_plans_name nnUNetResEncUNetPlans_40G
 ````
-In this example, the nnUNet planner will be optimized to use a GPU memory target of 80 GB of VRAM. Since the resulting batch size and patch size will be modified accordingly, this will impact your segmentation results! For more information, please refer to this [link](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/resenc_presets.md). 
+In this example, the nnUNet planner will be optimized to use a GPU memory target of 40 GB of VRAM. Since the resulting batch size and patch size will be modified accordingly, this will impact your segmentation results! For more information, please refer to this [link](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/resenc_presets.md). 
 
 # 4. High Performance Computer cluster
 ## 4.1. Introduction
@@ -247,7 +249,7 @@ Once your virtual environment is created, you can install PyTorch. PyTorch is an
 ````
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
 ````
-Note that, here, we install an older PyTorch version (compatible with the CUDA platform 11.7). More recent versions of CUDA are currently available, however we have not yet tried them on our cluster.
+Note that, here, we install an older PyTorch version (compatible with the CUDA platform 11.7). More recent versions of CUDA are currently available, however we have not yet tried them on the EVE cluster.
 
 ### 4.5.3. Install nnUNet
 To install nnUNet, please repeat the operation described at the section 3.1.3. 
@@ -256,29 +258,27 @@ To install nnUNet, please repeat the operation described at the section 3.1.3.
 Once nnUNet is installed, you can move the nnUNet_preprocessed folder (created on your local machine, see section 3.3) can be moved to a directory of your choice on your cluster. 
 
 # 5. Training
-The training step uses the content of the nnUNet_preprocessed folder and saves the models, logs and checkpoints in the nnUNet_results folder (for this, the "nnUNet_results" folder has to exist). nnUNet is trained using a 5-fold cross-validation scheme. This means that separate training folds are performed and each of the fold creates a classifier file which contains the weights of the model. To run the training on your cluster, open the file `submit_nnunet_training.sh` with a text editor (e.g., gedit):
+The training step uses the content of the nnUNet_preprocessed folder and saves the models, logs and checkpoints in the nnUNet_results folder (for this, the "nnUNet_results" folder has to exist). nnUNet is trained using a 5-fold cross-validation scheme. This means that separate training folds are performed and each of the fold creates a classifier file which contains the weights of the model. To run the training on your cluster, open the file `submit_nnUNet_training.sh` with a text editor (e.g., gedit):
 
 <!-- the classifier file is named "checkpoints_best.pth" -->
 
 ````shell
-gedit submit_nnunet_training.sh 
+gedit submit_nnUNet_training.sh 
 ````
 In the shell file, modify the parameters related to your job submission. These parameters are the ones given after the command #SBATCH in the code below. Here, it is hard for us to give recommendations because some parameters such as memory, time and GPU depend on your input image size and cluster specifications. The values given hereunder are probably a good start, but you might want to tweek them to optimize your resource request.
 
 ````shell
 #!/bin/bash
-
-#SBATCH --job-name=nnunet_training     # jobname
-#SBATCH --chdir=/work/username         # set the working directory 
-#SBATCH --output=/work/%u/%x-%A-%a.log # give name and filepath for the .log file (console output)
-#SBATCH --time=1080                    # time requested for each training job (in minutes)
-#SBATCH --nodes=1                      # number of nodes requested
-#SBATCH --ntasks=1                     # number of tasks across all nodes
-#SBATCH --cpus-per-task=7              # number of cpus per tasks (>1 for multithreading). 
-#SBATCH --mem-per-cpu=60G              # memory allocated per CPU. 
-#SBATCH --mail-type=BEGIN,END          # request notifications upon starting and ending the job
-#SBATCH -G nvidia-a100:1               # request specifically a NVIDIA A100 
-#SBATCH --constraint a100-vram-80G     # request a NVIDIA A100 with 80G VRAM. 
+#SBATCH --job-name=nnunet_training  
+#SBATCH --chdir=/work/phalempi      # modify with your paths
+#SBATCH --output=/work/%u/%x-%A-%a.log
+#SBATCH --time=4300                 # modify with your time limit (in min); < 3 days (on EVE)
+#SBATCH --nodes=1                   # one GPU per node
+#SBATCH --ntasks=1                  # one fold per task
+#SBATCH --cpus-per-task=24          # 24 CPU from 56 CPU available
+#SBATCH --mem-per-cpu=18G           # 24*18=432GB so (432/470)+-= 90% of total RAM of the node
+#SBATCH --mail-type=BEGIN,END       # modify with your mail preferences
+#SBATCH -G nvidia-a100:1            # modify with your GPU preferences
 
 ###  Loading Python 3.10.8
 module load foss/2022b Python/3.10.8
@@ -293,7 +293,7 @@ export nnUNet_results="/work/phalempi/nnUNet_results"                # modify ac
 nnUNetv2_train 777 3d_fullres $SLURM_ARRAY_TASK_ID -tr nnUNetTrainer_betterIgnoreSampling # replace "777" by your TaskID
 
 ## If you used a non-default ExperimentPlanner, you need to specify it in the command as such: 
-# nnUNetv2_train 777 3d_fullres $SLURM_ARRAY_TASK_ID -tr nnUNetTrainer_betterIgnoreSampling -p nnUNetResEncUNetPlans_80G
+# nnUNetv2_train 777 3d_fullres $SLURM_ARRAY_TASK_ID -tr nnUNetTrainer_betterIgnoreSampling -p nnUNetResEncUNetPlans_40G
 ````
 
 Note that, with the last #SBATCH command, we constrain the use of A100s with 80G VRAM. This is due to the fact that the EVE cluster hosts several A100 GPUs with different VRAM capacities (i.e., 40 GB or 80GB). Since we have optimized the experiment for a target GPU memory of 80 GB (see section 3.3), we need to make sure to exclude GPUS with <80 GB of VRAM. Having the same GPUs with different VRAM is most likely a unique feature of the EVE cluster of the UFZ, so GPU VRAM constraining might not be relevant in your case. Still, it might be convenient to know about this possibility. 
@@ -473,6 +473,7 @@ This repository was drafted by Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HI
 Part of this work was funded by Helmholtz Imaging (HI), a platform of the Helmholtz Incubator. 
 
 <p align="left">
+  <img src="aulogo_uk_var1_blue.png" width="300"> 
   <img src="Figures/UFZ_Logo.png" width="500"> 
-  <img src="Figures/HI_Logo.png" width="300"> 
+  <img src="Figures/HI_Logo.png" width="150"> 
 </p>

@@ -1,0 +1,27 @@
+#!/bin/bash
+#SBATCH --job-name=nnunet_training  
+#SBATCH --chdir=/work/phalempi      # modify with your paths
+#SBATCH --output=/work/%u/%x-%A-%a.log
+#SBATCH --time=4300                 # modify with your time limit (in min); < 3 days (on EVE)
+#SBATCH --nodes=1                   # one GPU per node
+#SBATCH --ntasks=1                  # one fold per task
+#SBATCH --cpus-per-task=24          # 24 CPU from 56 CPU available
+#SBATCH --mem-per-cpu=18G           # 24*18=432GB so (432/470)+-= 90% of total RAM of the node
+#SBATCH --mail-type=BEGIN,END       # modify with your mail preferences
+#SBATCH -G nvidia-a100:1            # modify with your GPU preferences
+
+##  loading Python version 3.10
+module load foss/2022b Python/3.10.8
+
+##  activating  the virtual environment
+source /home/phalempi/venv310/bin/activate # modify with your paths
+
+## declaring the environment variable
+export nnUNet_preprocessed="/work/phalempi/nnUNet_preprocessed" # modify with your path
+export nnUNet_results="/work/phalempi/nnUNet_results" # modify with your path
+
+## Setting the correct number of workers used for data augmentation (for training only)
+export nnUNet_n_proc_DA=20 # 20 < 24 #CPU to leave headroom for system processes
+
+## Run training with nnUNet native command
+nnUNetv2_train 777 3d_fullres $SLURM_ARRAY_TASK_ID -tr nnUNetTrainer_betterIgnoreSampling -p nnUNetResEncUNetPlans_M40G
