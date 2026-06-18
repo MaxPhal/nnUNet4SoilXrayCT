@@ -467,13 +467,11 @@ nnUNetv2_train --help # This command displays all possible arguments that a nnUN
 ````
 
 # Contribution
-This repository was drafted by Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HI). It was reviewed and edited by Steffen Schlüter (UFZ), Maik Geers-Lucas (TUBerlin) and Fabian Isensee (DKFZ, HI). It is currently being maintained by Maxime Phalempin (UFZ, AU).
+This repository was drafted by Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HI). It was reviewed and edited by Steffen Schlüter (UFZ), Maik Geers-Lucas (TUBerlin) and Fabian Isensee (DKFZ, HI). It is currently being maintained by Maxime Phalempin (Aarhus University, UFZ).
 
 # Acknowledgements
 Part of this work was funded by Helmholtz Imaging (HI), a platform of the Helmholtz Incubator. 
 
 <p align="left">
-  <img src="aulogo_uk_var1_blue.png" width="300"> 
-  <img src="Figures/UFZ_Logo.png" width="500"> 
-  <img src="Figures/HI_Logo.png" width="150"> 
+  <img src="Figures/Logos_mosaic.png" width="500"> 
 </p>
