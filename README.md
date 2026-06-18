@@ -298,7 +298,7 @@ nnUNetv2_train 777 3d_fullres $SLURM_ARRAY_TASK_ID -tr nnUNetTrainer_betterIgnor
 
 Note that, with the last #SBATCH command, we constrain the use of A100s with 80G VRAM. This is due to the fact that the EVE cluster hosts several A100 GPUs with different VRAM capacities (i.e., 40 GB or 80GB). Since we have optimized the experiment for a target GPU memory of 80 GB (see section 3.3), we need to make sure to exclude GPUS with <80 GB of VRAM. Having the same GPUs with different VRAM is most likely a unique feature of the EVE cluster of the UFZ, so GPU VRAM constraining might not be relevant in your case. Still, it might be convenient to know about this possibility. 
 
-In order to run training folds simultaneously, we have to create a so-called "array job". Job arrays allow to use SLURM's ability to create multiple jobs from one script. For example, instead of having five submission scripts to run the same job step with different arguments, we can have one script to run the five job steps at once. This allows to leverage the cluster´s ability to process images simulateneously (x GPUs process x training fold at the same time). After adjusting #SBATCH arguments and filepaths, submit the shell script as an array job using the following command. For more information on available sbatch commands, you are refered to the [SLURM official website][https://slurm.schedmd.com/sbatch.html#OPT_constraint]
+In order to run training folds simultaneously, we have to create a so-called "array job". Job arrays allow to use SLURM's ability to create multiple jobs from one script. For example, instead of having five submission scripts to run the same job step with different arguments, we can have one script to run the five job steps at once. This allows to leverage the cluster´s ability to process images simulateneously (x GPUs process x training fold at the same time). After adjusting #SBATCH arguments and filepaths, submit the shell script as an array job using the following command. For more information on available sbatch commands, you are refered to the [SLURM official website](https://slurm.schedmd.com/sbatch.html#OPT_constraint]).
 
 ````shell
 sbatch -a 0-4 submit_nnunet_training.sh 
@@ -365,7 +365,6 @@ To run predictions with an array job, modify the shell script ``submit_nnUNet_in
 #SBATCH --mem-per-cpu=60G
 #SBATCH --mail-type=BEGIN,END
 #SBATCH -G nvidia-a100:1
-#SBATCH --constraint a100-vram-80G
 
 ###  Loading Python 3.10.8
 module load foss/2022b Python/3.10.8
@@ -394,7 +393,7 @@ done
 nnUNetv2_predict -i "$folder_path_in"/"${file_list[$SLURM_ARRAY_TASK_ID]}" -o "$folder_path_out" -d 777 -tr nnUNetTrainer_betterIgnoreSampling -c 3d_fullres
 
 ## If you used a non-default ExperimentPlanner, you need to specify it in the command as such: 
-#nnUNetv2_predict -i "$folder_path_in"/"${file_list[$SLURM_ARRAY_TASK_ID]}" -o "$folder_path_out" -d 777 -tr nnUNetTrainer_betterIgnoreSampling -c 3d_fullres -p nnUNetResEncUNetPlans_80G
+#nnUNetv2_predict -i "$folder_path_in"/"${file_list[$SLURM_ARRAY_TASK_ID]}" -o "$folder_path_out" -d 777 -tr nnUNetTrainer_betterIgnoreSampling -c 3d_fullres -p nnUNetResEncUNetPlans_40G
 ````
 Also make sure to replace the argument given after the flag -d with the name of your TaskID. To submit the array job, use the following command:
 
@@ -473,5 +472,5 @@ This repository was drafted by Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HI
 Part of this work was funded by Helmholtz Imaging (HI), a platform of the Helmholtz Incubator. 
 
 <p align="left">
-  <img src="Figures/Logos_mosaic.png" width="500"> 
+  <img src="Figures/Logos_mosaic.png" width="800"> 
 </p>

@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #SBATCH --job-name=prepare_raw
 #SBATCH --chdir=/work/phalempi
 #SBATCH --output=/work/%u/%x-%A.log        #/work/user/job-name/jobid

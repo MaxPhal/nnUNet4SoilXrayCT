@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #SBATCH --job-name=nnunet_preprocessing
 #SBATCH --chdir=/work/phalempi
 #SBATCH --output=/work/%u/%x-%A.log

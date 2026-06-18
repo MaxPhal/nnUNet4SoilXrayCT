@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #SBATCH --job-name=nnunet_prediction
 #SBATCH --chdir=/work/phalempi
 #SBATCH --output=/work/%u/%x-%A-%a.log
