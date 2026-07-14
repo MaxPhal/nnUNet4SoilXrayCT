@@ -170,7 +170,7 @@ ImageJ is a free, open-source image processing software widely used in scientifi
 4. Place nifti_io.jar (currently in ./nnUNetX4SoilXrayCT/Utilities) into the plugins folder of ImageJ (at ../Fiji.app/plugins")
    
 ### 2.1.6. Setting file paths
-Open the ``\_\_path__.py`` file (from this repository) with a text editor and adapt the paths according to your local installations. You have to define the four following paths: 
+Open the ``__path__.py`` file (from this repository) with a text editor and adapt the paths according to your local installations. You have to define the four following paths: 
 1) the path to your ImageJ application
 2) the path to the nnUNet_raw folder (same as you set as an environment variable during the nnUNet installation)
 3) the path to the images of your training data (input_dir_images) # IMPORTANT: images should be in 3D stack .tif format
@@ -306,8 +306,8 @@ nnUNetv2_train 777 3d_fullres $SLURM_ARRAY_TASK_ID -tr nnUNetTrainer_betterIgnor
 ## If you used a non-default ExperimentPlanner, you need to specify it in the command as such: 
 # nnUNetv2_train 777 3d_fullres $SLURM_ARRAY_TASK_ID -tr nnUNetTrainer_betterIgnoreSampling -p nnUNetResEncUNetPlans_40G
 ````
-
-Note that, with the last #SBATCH command, we constrain the use of A100s with 80G VRAM. This is due to the fact that the EVE cluster hosts several A100 GPUs with different VRAM capacities (i.e., 40 GB or 80GB). Since we have optimized the experiment for a target GPU memory of 80 GB (see section 3.3), we need to make sure to exclude GPUS with <80 GB of VRAM. Having the same GPUs with different VRAM is most likely a unique feature of the EVE cluster of the UFZ, so GPU VRAM constraining might not be relevant in your case. Still, it might be convenient to know about this possibility. 
+<!--
+Note that, with the last #SBATCH command, we constrain the use of A100s with 80G VRAM. This is due to the fact that the EVE cluster hosts several A100 GPUs with different VRAM capacities (i.e., 40 GB or 80GB). Since we have optimized the experiment for a target GPU memory of 80 GB (see section 3.3), we need to make sure to exclude GPUS with <80 GB of VRAM. Having the same GPUs with different VRAM is most likely a unique feature of the EVE cluster of the UFZ, so GPU VRAM constraining might not be relevant in your case. Still, it might be convenient to know about this possibility. -->
 
 In order to run training folds simultaneously, we have to create a so-called "array job". Job arrays allow to use SLURM's ability to create multiple jobs from one script. For example, instead of having five submission scripts to run the same job step with different arguments, we can have one script to run the five job steps at once. This allows to leverage the cluster´s ability to process images simulateneously (x GPUs process x training fold at the same time). After adjusting #SBATCH arguments and filepaths, submit the shell script as an array job using the following command. For more information on available sbatch commands, you are refered to the [SLURM official website](https://slurm.schedmd.com/sbatch.html#OPT_constraint]).
 
