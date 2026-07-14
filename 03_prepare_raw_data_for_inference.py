@@ -61,7 +61,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-n",
         "--norm",
-        default="zscore",
+        default="noNorm,
         help="normalization type, one of [noNorm, zscore, rescale_to_0_1, rgb_to_0_1]",
     )
     args = parser.parse_args()

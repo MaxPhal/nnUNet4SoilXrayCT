@@ -144,6 +144,11 @@ def mask_to_nnUNet(mask_data: np.ndarray, num_classes: int) -> np.ndarray:
 
 if __name__ == "__main__":
     """
+    Note: This script is intented to be run on a workstation and not on a cluster. It is designed to prepare the raw data for training with nnUNet.
+    It takes the input images and annotations, converts them to the appropriate format, normalizes the images, and saves them in a common temporary folder. 
+    The script also handles the creation of the necessary directory structure for nnUNet training and generates a dataset.json file which is required for nnUNet 
+    to recognize the dataset.
+
     PARAMETERS NEEDED TO BE MANUALLY ADOPTED FOR EACH DATASET
     :param input_dir_images: Path to the folder which contains the images in the .tif file format -- this is now read from the __path__ file
     :param input_dir_masks: Path to the folder which contains the annotations in the .tif file format -- this is now read from the __path__ file
@@ -256,6 +261,9 @@ if __name__ == "__main__":
 
     """
     Step4: Create the dataset.json which is needed for nnUNet and contains information about the dataset
+    Note: Here the dataset.json is created after all images and annotations have been processed and saved in
+    the nnUNet format. This is because the dataset.json requires information about the number of training images, 
+    which can only be determined after processing all files.
     """
     Classes[0] = "background"  # first class has to be named background, corresponds to soil matrix
     Classes.append("ignore")  # ignore label has to be on the last position
