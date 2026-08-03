@@ -38,4 +38,4 @@ for file in "$input_dir_images"/*; do
 done
 
 ## Prepare raw data
-python /home/phalempi/nnUNet4SoilXrayCT/02_prepare_raw_data_for_training_hpc.py -im "$input_dir_images"/"${file_list[$SLURM_ARRAY_TASK_ID]}" -an "$input_dir_masks"/"${file_list[$SLURM_ARRAY_TASK_ID]}" -id "${file_list[$SLURM_ARRAY_TASK_ID]}"
+python /home/phalempi/nnUNet4SoilXrayCT/02a_prepare_raw_data_for_training_hpc.py -im "$input_dir_images"/"${file_list[$SLURM_ARRAY_TASK_ID]}" -an "$input_dir_masks"/"${file_list[$SLURM_ARRAY_TASK_ID]}" -id "${file_list[$SLURM_ARRAY_TASK_ID]}"

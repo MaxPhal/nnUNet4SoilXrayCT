@@ -22,4 +22,4 @@ export nnUNet_raw="/work/phalempi/nnUNet_raw"
 cd /home/phalempi/nnUNet4SoilXrayCT
 
 ## Prepare raw data
-python /home/phalempi/nnUNet4SoilXrayCT/generate_json_file.py 
+python /home/phalempi/nnUNet4SoilXrayCT/02b_generate_json_file_hpc.py 
