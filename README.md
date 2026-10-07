@@ -109,7 +109,7 @@ To create representative ground truth datasets, it is important to select subvol
 **IMPORTANT**: The selected images for ground truth generation should be in a 3D .tif file format.  
 
 ## 2.3. Image annotation
-For image annotation, we developed a strategy that minimizes annotation efforts while still ensuring that all relevant classes are captured. This strategy relies on dense annotations of one slice and sparse annotations for other interesting classes within a stack (see figure 2 in our [publication](https://doi.org/10.22541/essoar.173395846.68597189/v1)). To perform dense annotations, the middle slice of the stack is segmented with Otsu thresholding to isolate the soil matrix and it is manually annotated for the other classes. 
+For image annotation, we developed a strategy that minimizes annotation efforts while still ensuring that all relevant classes are captured. This strategy relies on dense annotations of one slice and sparse annotations for other interesting classes within a stack (see figure 2 in our [publication](https://doi.org/10.1016/j.geoderma.2025.117321). To perform dense annotations, the middle slice of the stack is segmented with Otsu thresholding to isolate the soil matrix and it is manually annotated for the other classes. 
 
 To do so in a semi-automatic manner, we created the `01_make_annotations.py` script. This script takes three arguments, i.e., the input folder path (the path to the folder containing the images that you want to annotate), the output folder path (the path to the folder where the annotations will be saved; if the folder does not exists, it will be created automatically) and the sample ID (the name of your 3D tif image, without its extension). These arguments are passed from the command terminal with three flags, i.e., "-i", "-o" and "-id", respectively.   
 
@@ -154,7 +154,9 @@ set nnUNet_preprocessed = your/path/to/nnUNet_preprocessed
 ````
 
 ### 3.1.4. Download ImageJ <!-- Successful on BOPHY116 -->
-ImageJ is a free, open-source image processing software widely used in scientific research. In our workflow, we used ImageJ to convert the input images to a nnUNet-friendly format. You can download ImageJ (Fiji) from [here](https://imagej.net/software/fiji/downloads#other-downloads).
+ImageJ is a free, open-source image processing software widely used in scientific research. In our workflow, we used ImageJ to convert the input images to a nnUNet-friendly format. You can download ImageJ (Fiji) from [here]*(https://imagej.net/software/fiji/downloads#other-downloads).
+
+** *Note: to run ImageJ on a HPC, make sure to download 64-bit Linux compatible version. The Java 8 version from 2017 May 30 worked well for us.**
 
 ### 3.1.5. Download the files from this repository and place them in appropriate folders 
 1. Put the imageJ macros (files ending with .ijm) into the macros folder in the Fiji app (at .../Fiji.app/macros)
@@ -472,7 +474,11 @@ pip show nnunetv2 # This can be useful to check software versions and make sure 
 # Example
 nnUNetv2_train --help # This command displays all possible arguments that a nnUNet native command can take. It is very useful and we recommend to use it for all commonly used nnUNet commands!  
 ````
-
+````shell
+tail -f job.log
+# Example
+tail -f /work/phalempi/nnunet_training_952314845_0.log # this allows to live display the content of the log file of your job! Very practical
+````
 # Contribution
 This repository was drafted by Maxime Phalempin (UFZ) and Lars Krämer (DKFZ, HI). It was reviewed and edited by Steffen Schlüter (UFZ), Maik Geers-Lucas (TUBerlin) and Fabian Isensee (DKFZ, HI). It is currently being maintained by Maxime Phalempin (Aarhus University, UFZ).
 

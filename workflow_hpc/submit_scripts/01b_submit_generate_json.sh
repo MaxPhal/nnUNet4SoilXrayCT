@@ -2,7 +2,6 @@
 #SBATCH --job-name=generate_json
 #SBATCH --chdir=/work/phalempi
 #SBATCH --output=/work/%u/%x-%A.log    #/work/user/job-name/jobid
-#SBATCH --partition=compute
 #SBATCH --time=5
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -19,7 +18,7 @@ source /home/phalempi/venv310/bin/activate # modify with your paths
 export nnUNet_raw="/work/phalempi/nnUNet_raw"
 
 ## set path to find dataset_info.json
-cd /home/phalempi/nnUNet4SoilXrayCT
+cd /home/phalempi/nnUNet4SoilXrayCT/workflow_hpc
 
 ## Prepare raw data
-python /home/phalempi/nnUNet4SoilXrayCT/02b_generate_json_file_hpc.py 
+python generate_json_file_hpc.py 

@@ -1,23 +1,18 @@
 import glob
 import os
-import json
-from os.path import join, split
 from pathlib import Path
-from typing import List
+from os.path import join
 from nnunetv2.dataset_conversion.generate_dataset_json import generate_dataset_json
-
-from __path__ import PATH_ImageJ, PATH_nnUNet_raw, input_dir_images, input_dir_masks 
-
-# Load the JSON file with metadata
-cwd = os.getcwd()
-with open(cwd + '/dataset_info.json', "r") as metadata_json_file:
-    metadata = json.load(metadata_json_file)
+from prepare_raw_data_for_training_hpc import read_metadata
+from __path__ import PATH_nnUNet_raw
 
 if __name__ == "__main__":
     """
     Create the dataset.json which is needed for nnUNet and contains information about the dataset
-    """    
-    
+    """   
+    # Read metadata 
+    metadata = read_metadata(Path.cwd() / 'dataset_info.json')  
+
     # Extract metadata information from .json file
     TaskID = metadata["TaskID"]
     DatasetName  = metadata["DatasetName"]

@@ -6,9 +6,10 @@ import argparse
 import json
 from pathlib import Path
 
-def load_metadata(metadata_path):
-    with open(metadata_path, "r") as f:
-        metadata = json.load(f)
+def read_metadata(path):
+    """Load the dataset metadata JSON file from the current working directory."""
+    with open(path, "r") as metadata_json_file:
+        metadata = json.load(metadata_json_file)
     return metadata
 
 def load_image(input_path, sample_id):
@@ -66,7 +67,7 @@ def main():
     parser.add_argument('-i', type=Path, required=True, help='Path to the input directory')
     parser.add_argument('-o', type=Path, required=True, help='Path to save the output')
     parser.add_argument('-id', type=str, required=True, help='Sample ID')
-    parser.add_argument('-write', type=str, default= 'yes', required=False, help='Whether to save annotations or not - Possible answers: yes, no - /!\ yes overwrites previous annotations - Default is yes')
+    parser.add_argument('-write', type=str, default= 'yes', required=False, help='Whether to save annotations or not - Possible answers: yes, no - Watch out: yes overwrites previous annotations - Default is yes')
     parser.add_argument('-v', action='store_true', help='Increase output verbosity')
     args = parser.parse_args()
 
@@ -79,7 +80,7 @@ def main():
     else:   
         annotations = apply_threshold(grayscale_data)
     
-    metadata = load_metadata(Path.cwd() / 'dataset_info.json')
+    metadata = read_metadata(Path.cwd() / 'dataset_info.json')
     color_dict = normalize_colors(metadata)
 
     visualize_data(grayscale_data, annotations, color_dict)

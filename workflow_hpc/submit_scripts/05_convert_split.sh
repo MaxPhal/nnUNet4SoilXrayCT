@@ -19,15 +19,13 @@ source /home/phalempi/venv310/bin/activate # modify with your paths
 export nnUNet_raw="/work/phalempi/nnUNet_raw"
 
 ## set path to find dataset_info.json and __path__.py
-cd /home/phalempi/nnUNet4SoilXrayCT
+cd /home/phalempi/nnUNet4SoilXrayCT/workflow_hpc/
 
 ## retrieve file paths from __path__.py (in pwd)
-input_dir_images=$(python3 -c "from __path__ import input_dir_images; print(input_dir_images)")
-input_dir_masks=$(python3 -c "from __path__ import input_dir_masks; print(input_dir_masks)")
+input_dir_images=/home/maxph/data/to_predict_tif
 
 # Initialize an empty list
 file_list=()
-
 # Loop through all files in the folder and add them to the list
 # this works assuming that grayscale and annotations have the same name but are located in different folders!
 for file in "$input_dir_images"/*; do
@@ -37,5 +35,5 @@ for file in "$input_dir_images"/*; do
     fi
 done
 
-## Prepare raw data
-python /home/phalempi/nnUNet4SoilXrayCT/02a_prepare_raw_data_for_training_hpc.py -im "$input_dir_images"/"${file_list[$SLURM_ARRAY_TASK_ID]}" -an "$input_dir_masks"/"${file_list[$SLURM_ARRAY_TASK_ID]}" -id "${file_list[$SLURM_ARRAY_TASK_ID]}"
+## Prepare raw data /!\ modify input args
+python convert_and_split_for_inference_hpc.py -i "$input_dir_images"/"${file_list[$SLURM_ARRAY_TASK_ID]}" -o /home/phalempi/data/to_predict_splits

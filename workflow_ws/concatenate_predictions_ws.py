@@ -1,7 +1,6 @@
 import argparse
 import os
 from os.path import join
-
 import numpy as np
 import SimpleITK as sitk
 
@@ -32,7 +31,7 @@ def ensemble_files(img_folder, output_folder):
         ) / 2
 
         for i in range(0, len(images_i)):
-            # file = f"{image_root}__{axis}__{min_pos[i]}__{max_pos[i]}__0000.nii.gz"
+            #file = f"{image_root}__{axis}__{min_pos[i]}__{max_pos[i]}__0000.nii.gz"
             file = f"{image_root}__{axis}__{min_pos[i]}__{max_pos[i]}_.nii.gz"
             img_i = sitk.ReadImage(join(img_folder, file))
 

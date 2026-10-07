@@ -1,103 +1,102 @@
 import glob
 import os
-import shutil
-import json
-import subprocess
-from os.path import join, split
+from os.path import join
 from pathlib import Path
 from typing import List
-
 import nibabel as nib
 import numpy as np
+import tifffile
 from nnunetv2.dataset_conversion.generate_dataset_json import generate_dataset_json
 from tqdm import tqdm
+from make_annotations import read_metadata
 
-from __path__ import PATH_ImageJ, PATH_nnUNet_raw, input_dir_images, input_dir_masks 
+from __path__ import PATH_nnUNet_raw, input_dir_images, input_dir_masks
 
-# Load the JSON file with metadata
-cwd = os.getcwd()
-with open(cwd + '/dataset_info.json', "r") as metadata_json_file:
-    metadata = json.load(metadata_json_file)
-
-def convert_mha_to_hdr(input_dir: str, output_dir: str) -> None:
+# ---------------------------------------------------------------------------
+# .tif -> .nii.gz conversion, done directly in Python (no ImageJ)
+# ---------------------------------------------------------------------------
+def _resolution_to_spacing(res_value) -> float:
     """
-    Use ImageJ and the convert_mha_to_img macro script to convert .mha files to .hdr & .img files
-
-    :param input_dir: path to the input folder which contains the .mha files
-    :param output_dir: path to the folder in which the output should be saved in
-    :return:
+    Convert a TIFF XResolution/YResolution tag value (pixels-per-unit) to a
+    pixel spacing (unit-per-pixel). tifffile may return this as a (num, den)
+    rational tuple or as an already-resolved float, depending on version.
     """
-    # os.makedirs(output_dir, exist_ok=True)
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-    print("Process .mha to .hdr")
-    subprocess.Popen(
-        rf'{PATH_ImageJ} --headless -macro convert_mha_to_img "{input_dir}--{output_dir}"',
-        # fr'{PATH_ImageJ} -macro convert_mha_to_img "{input_dir}--{output_dir}"', # it helps to put it in macro mode to debug
-        shell=True,
-    ).wait()
-    
-def convert_tif_to_hdr(input_dir: str, output_dir: str) -> None:
+    if res_value is None:
+        return 1.0
+    if isinstance(res_value, tuple) and len(res_value) == 2:
+        num, den = res_value
+        if num == 0:
+            return 1.0
+        return den / num
+    if res_value == 0:
+        return 1.0
+    return 1.0 / res_value
+
+
+def extract_spacing_from_tif(tif: tifffile.TiffFile) -> tuple:
     """
-    Use ImageJ and the convert_tif_to_img macro script to convert .tif files to .hdr & .img files
+    Extract voxel spacing (x, y, z) from a tif's embedded metadata.
 
-    :param input_dir: path to the input folder which contains the .mha files
-    :param output_dir: path to the folder in which the output should be saved in
-    :return:
+    - x/y spacing come from the standard TIFF XResolution/YResolution tags.
+    - z spacing comes from ImageJ's own metadata (the "spacing=..." entry in
+      the ImageDescription), if present; defaults to 1.0 otherwise.
+
+    :return: (x_spacing, y_spacing, z_spacing)
     """
-    # os.makedirs(output_dir, exist_ok=True)
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-    print("Process .tif to .hdr")
-    subprocess.Popen(
-        rf'{PATH_ImageJ} --headless -macro convert_tif_to_img "{input_dir}--{output_dir}"',
-        #fr'{PATH_ImageJ} -macro convert_mha_to_img "{input_dir}--{output_dir}"', # it helps to put it in macro mode to debug
-        shell=True,
-    ).wait()
+    page = tif.pages[0]
+    tags = page.tags
 
-def convert_hdr_to_nii(input_dir: str, is_mask: bool = False, num_classes: int = None) -> None:
+    x_res = tags["XResolution"].value if "XResolution" in tags else None
+    y_res = tags["YResolution"].value if "YResolution" in tags else None
+
+    x_spacing = _resolution_to_spacing(x_res)
+    y_spacing = _resolution_to_spacing(y_res)
+
+    ij_meta = tif.imagej_metadata or {}
+    z_spacing = float(ij_meta.get("spacing", 1.0))
+    unit = ij_meta.get("unit", "unknown")
+
+    print(
+        f"  Spacing from tif metadata: x={x_spacing}, y={y_spacing}, "
+        f"z={z_spacing} (unit: {unit})"
+    )
+
+    return x_spacing, y_spacing, z_spacing
+
+
+def read_tif_as_nib_data(tif_path: str) -> tuple:
     """
-    Convert the .hdr/.img files to .nii.gz and save them in the same directory.
-    Afterward delete the .hdr/.img files.
-    If is_mask check if all Class IDs in the annotation are between 0 and num_classes
+    Read a .tif image via tifffile and return (data, affine) ready for
+    nib.Nifti1Image, preserving the tif's embedded x/y/z spacing.
 
-    :param input_dir: directory which contains the .hdr/.img files
-    :param is_mask: if the file is a mask, and it should be checked if label ids are valid
-    :param num_classes: if is_mask is set, the number of classes is needed.
-    :return:
+    tifffile reads axes as (Z, Y, X); this is transposed to (X, Y, Z) to
+    match this script's nibabel-based convention (Step 3 below indexes the
+    z-axis as shape[2]).
+
+    :return: (img_arr, affine)
     """
-    hdr_files = glob.glob(join(input_dir, "*.hdr"))
+    with tifffile.TiffFile(tif_path) as tif:
+        img_arr = tif.asarray()
+        x_spacing, y_spacing, z_spacing = extract_spacing_from_tif(tif)
 
-    for hdr_file in tqdm(hdr_files, desc="Process File to .nii.gz"):
-        # Load the file
-        img = nib.load(hdr_file)
-        img_arr = img.get_fdata().astype(np.uint8)[:, :, :, 0]
-        # Check if there is a Class ID outside [0:num_classes]
-        if is_mask:
-            min_idx, max_idx = np.min(img_arr), np.max(img_arr)
-            if min_idx < 0 or max_idx >= num_classes:
-                print(f"WARNING: Index ERROR in file: {hdr_file} - min={min_idx} max={max_idx}")
-                print(f"         The corresponding Voxels will be ignored")
+    img_arr = img_arr.transpose((2, 1, 0))  # (Z, Y, X) -> (X, Y, Z)
+    affine = np.diag([x_spacing, y_spacing, z_spacing, 1.0]).astype(np.float64)
+    return img_arr, affine
 
-        # Save the file as .nii.gz
-        nib.save(
-            nib.Nifti1Image(img_arr, img.affine, img.header),
-            hdr_file.replace(".hdr", ".nii.gz"),
-        )
-
-        # Clear RAM and delete the .hdr/.img files
-        del img, img_arr
-        os.remove(hdr_file)
-        os.remove(hdr_file.replace(".hdr", ".img"))
 
 def get_img_file(mask_name: str, img_files: List[str], img_postfix: str) -> str:
     """
     Get the image file which corresponds to the mask_name
 
-    :param mask_name: name of the current mask file
-    :param img_files: list of all image files
+    :param mask_name: name of the current mask file (without extension)
+    :param img_files: list of all candidate image files (any extension)
     :param img_postfix: postfix of the image files to match mask and image files
     :return str:
     """
-    img_names = [split(img_file)[-1].replace(img_postfix + ".nii.gz", "") for img_file in img_files]
+    img_names = [
+        os.path.splitext(os.path.basename(img_file))[0].replace(img_postfix, "")
+        for img_file in img_files
+    ]
     for i, name in enumerate(img_names):
         if name in mask_name:
             return img_files[i]
@@ -145,7 +144,8 @@ def mask_to_nnUNet(mask_data: np.ndarray, num_classes: int) -> np.ndarray:
 if __name__ == "__main__":
     """
     Note: This script is intented to be run on a workstation and not on a cluster. It is designed to prepare the raw data for training with nnUNet.
-    It takes the input images and annotations, converts them to the appropriate format, normalizes the images, and saves them in a common temporary folder. 
+    It takes the input images and annotations, converts them directly from .tif to the nnUNet format (cropped, normalized), and saves them 
+    straight into imagesTr/labelsTr - no intermediate temp folder is used. 
     The script also handles the creation of the necessary directory structure for nnUNet training and generates a dataset.json file which is required for nnUNet 
     to recognize the dataset.
 
@@ -166,6 +166,7 @@ if __name__ == "__main__":
     """
 
     # Extract metadata information from .json file
+    metadata = read_metadata(Path.cwd() / 'dataset_info.json')
     TaskID = metadata["TaskID"]
     DatasetName  = metadata["DatasetName"]
     label_names = metadata["labels"]
@@ -184,49 +185,44 @@ if __name__ == "__main__":
     """
     Manage Folders
     """
-    temp_img_folder = join(output_folder, "temp_images_nii")
-    temp_mask_folder = join(output_folder, "temp_labels_nii")
-
     nnUNet_img_folder = join(output_folder, "imagesTr")
     nnUNet_mask_folder = join(output_folder, "labelsTr")
-    # os.makedirs(nnUNet_img_folder, exist_ok=True)
-    # os.makedirs(nnUNet_mask_folder, exist_ok=True)
     Path(nnUNet_img_folder).mkdir(parents=True, exist_ok=True)
     Path(nnUNet_mask_folder).mkdir(parents=True, exist_ok=True)
 
     """
-    Step1: Convert annotation files from .tif to .nii.gz 
+    Step1: Convert each annotation/image .tif pair directly into nnUNet
+    format, straight into imagesTr/labelsTr - no intermediate temp folder
     """
-    #convert_mha_to_hdr(input_dir_mask, temp_img_folder) # uncomment if annotation files are in .mha format
-    convert_tif_to_hdr(input_dir_masks, temp_mask_folder) # with the new napari workflow for annotations, the images are saved in .tif automatically
-    convert_hdr_to_nii(temp_mask_folder, True, num_classes)
-    """
-    Step2: Convert image files from .tif to .nii.gz 
-    """
-    #convert_mha_to_hdr(input_dir_images, temp_img_folder) # uncomment if input grayscale data are in .mha format and commment the next line
-    convert_tif_to_hdr(input_dir_images, temp_img_folder) 
-    convert_hdr_to_nii(temp_img_folder)
-    """
-    Step3: Convert everything into nnUNet format
-    """
-    mask_files = glob.glob(join(temp_mask_folder, "*.nii.gz"))
-    img_files = glob.glob(join(temp_img_folder, "*.nii.gz"))
+    mask_tif_files = sorted(glob.glob(join(input_dir_masks, "*.tif")))
+    img_tif_files = sorted(glob.glob(join(input_dir_images, "*.tif")))
+    print(f"----------\n{len(mask_tif_files)} annotation files found")
+    print(f"----------\n{len(img_tif_files)} grayscale images found")
 
-    for mask_file in tqdm(mask_files, desc="Convert File to nnUNet Format"):
+    for mask_tif_file in tqdm(mask_tif_files, desc="Convert File to nnUNet Format"):
         """
         Find corresponding image file for the mask file
         """
-        mask_name = split(mask_file)[-1].replace(".nii.gz", "")
-        img_file = get_img_file(mask_name, img_files, img_file_postfix)
-        if img_file is None:
-            print(f"ERROR: No Image file was found for {mask_file}\n       Skipping {mask_file}")
+        mask_name = os.path.splitext(os.path.basename(mask_tif_file))[0] # returns image_ID without extension
+
+        img_tif_file = get_img_file(mask_name, img_tif_files, img_file_postfix)
+        print(img_tif_file)
+
+        if img_tif_file is None:
+            print(f"ERROR: No Image file was found for {mask_tif_file}\n       Skipping {mask_tif_file}")
             continue
 
         """
-        Convert mask into nnUNet format
+        Read mask, check label ids, convert into nnUNet format
         """
-        mask = nib.load(mask_file)
-        mask_data = mask.get_fdata().astype(np.uint8)
+        mask_data, mask_affine = read_tif_as_nib_data(mask_tif_file)
+        mask_data = mask_data.astype(np.uint8)
+
+        # Check if there is a Class ID outside [0:num_classes]
+        min_idx, max_idx = np.min(mask_data), np.max(mask_data)
+        if min_idx < 0 or max_idx >= num_classes:
+            print(f"WARNING: Index ERROR in file: {mask_tif_file} - min={min_idx} max={max_idx}")
+            print(f"         The corresponding Voxels will be ignored")
 
         # check which slices contain labeled data and crop accordingly
         _, _, z = np.where(mask_data != 0)
@@ -238,29 +234,28 @@ if __name__ == "__main__":
         mask_data = mask_to_nnUNet(mask_data, num_classes)
         # Save Mask File
         nib.save(
-            nib.Nifti1Image(mask_data, mask.affine, mask.header),
+            nib.Nifti1Image(mask_data, mask_affine),
             join(nnUNet_mask_folder, mask_name + ".nii.gz"),
         )
-        del mask, mask_data
+        del mask_data
 
         """
-        Convert image into nnUNet format
+        Read image, crop to annotation extent, normalize, save
         """
-        img = nib.load(img_file)
-        img_data = img.get_fdata()
+        img_data, img_affine = read_tif_as_nib_data(img_tif_file)
 
-        img_data = img_data[:, :, z_min:z_max] # crop the image to annotations
+        img_data = img_data[:, :, z_min:z_max]  # crop the image to annotations
         img_data = img_normalize(img_data, norm_type)
-        
+
         # Save Image File
         nib.save(
-            nib.Nifti1Image(img_data, img.affine, img.header),
+            nib.Nifti1Image(img_data, img_affine),
             join(nnUNet_img_folder, mask_name + "_0000.nii.gz"),
         )
-        del img, img_data
+        del img_data
 
     """
-    Step4: Create the dataset.json which is needed for nnUNet and contains information about the dataset
+    Step2: Create the dataset.json which is needed for nnUNet and contains information about the dataset
     Note: Here the dataset.json is created after all images and annotations have been processed and saved in
     the nnUNet format. This is because the dataset.json requires information about the number of training images, 
     which can only be determined after processing all files.
@@ -270,15 +265,9 @@ if __name__ == "__main__":
     labels = {name: i for i, name in enumerate(Classes)}
     generate_dataset_json(
         output_folder=output_folder,
-        channel_names={0: "noNorm"},
+        channel_names={0: norm_type},
         labels=labels,
         num_training_cases=len(glob.glob(join(nnUNet_img_folder, "*.nii.gz"))),
         file_ending=".nii.gz",
         dataset_name=DatasetName,
     )
-
-    """
-    Step5: Clean up and delete the temporal folders
-    """
-    shutil.rmtree(temp_img_folder)
-    shutil.rmtree(temp_mask_folder)
