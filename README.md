@@ -119,12 +119,12 @@ To create representative ground truth datasets, it is important to select subvol
 ## 2.3. Image annotation
 For image annotation, we developed a strategy that minimizes annotation efforts while still ensuring that all relevant classes are captured. This strategy relies on dense annotations of one slice and sparse annotations for other interesting classes within a stack (see figure 2 in our [publication](https://doi.org/10.1016/j.geoderma.2025.117321). To perform dense annotations, the middle slice of the stack is segmented with Otsu thresholding to isolate the soil matrix and it is manually annotated for the other classes. 
 
-To do so in a semi-automatic manner, we created the `make_annotations.py` script. This script takes two arguments, the output folder path (the path to the folder where the annotations will be saved; if the folder does not exists, it will be created automatically) and the sample ID (the name of your 3D tif image, without its extension). Note that the path for the input grayscale data is the one you defined in ``__path__.py``. The two arguments are passed from the command terminal with three flags, i.e.,-o" and "-id", respectively.   
+To do so in a semi-automatic manner, we created the `make_annotations.py` script. This script takes the sample ID (the name of your 3D tif image, without its extension) as an argument. Note that the paths for the input grayscale data and annotations is the one you defined in ``__path__.py``. The -id argument is parsed from the command terminal with "-id".   
 
 ````shell
-python make_annotations.py -o /path/to/where/annotations/will_be/saved -id sample_ID
+python make_annotations.py -id sample_ID
 # Example
-python make_annotations.py -o C:\Users\phalempi\Desktop\annotations -id SPP_P21_SPE_UC193
+python make_annotations.py -id SPP_P21_SPE_UC193
 ````
 Just a short moment after launching the script, the GUI of Napari pops up and displays the middle slice of the loaded image. On that middle slice, the soil matrix appears in purple color (for us 115, 0, 102 in RGB code). Note that if annotations are present in the output folder (because you saved but did not finish annotating one image), the previous annotations will be loaded automatically. 
 
