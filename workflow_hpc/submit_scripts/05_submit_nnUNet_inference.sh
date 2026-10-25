@@ -3,6 +3,7 @@
 #SBATCH --chdir=/work/phalempi
 #SBATCH --output=/work/%u/%x-%A-%a.log
 #SBATCH --time=90
+#SBATCH --cpus-per-task=3
 #SBATCH --mem-per-cpu=18G
 #SBATCH --mail-type=BEGIN,END
 #SBATCH -G nvidia-a100:1
@@ -30,6 +31,9 @@ for file in "$folder_path_in"/*; do
         file_list+=("$(basename "$file")")
     fi
 done
+
+# Setting the number of processes to use during preprocessing and exportation
+export nnUNet_def_n_proc=${SLURM_CPUS_PER_TASK:-1}
 
 ## Run inference with nnUNet native command
 nnUNetv2_predict -i "$folder_path_in"/"${file_list[$SLURM_ARRAY_TASK_ID]}" -o "$folder_path_out" -d 777 -tr nnUNetTrainer_betterIgnoreSampling -c 3d_fullres -p nnUNetResEncUNetPlans_M40G

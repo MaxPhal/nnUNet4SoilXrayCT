@@ -130,11 +130,10 @@ if __name__ == "__main__":
     """
     Note: This differs from the original script in that it is designed to be run on a cluster and takes 
     command line arguments for a single image/annotation pair, rather than looping over a folder. 
-    To launch the script, please use the bash file 01a_prepare_raw_data.sh which is located in the "Utilities" folder,
+    To launch the script, please use the bash file 01a_prepare_raw_data.sh which is located in the "submit_scripts" folder,
     e.g. once per SLURM array task, with the task -> image/annotation filename mapping handled there.
 
-    This version converts the .tif pair directly to nnUNet format in Python (no ImageJ, no .hdr/.img or temp-folder
-    intermediate) and saves straight into imagesTr/labelsTr.
+    This version converts the .tif pair directly to nnUNet format in Python
 
     PARAMETERS NEEDED TO BE MANUALLY ADOPTED FOR EACH DATASET
     :param DatasetName: Name of the Dataset, can be arbitrary

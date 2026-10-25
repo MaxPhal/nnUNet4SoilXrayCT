@@ -83,9 +83,8 @@ def read_tif_as_sitk(tif_path: str) -> sitk.Image:
 
     return img
 
-# ---------------------------------------------------------------------------
-# Steps 4/5: split (or copy) the opened image and save into its own folder
-# ---------------------------------------------------------------------------
+# Steps: split (or copy) the opened image and save into its own folder
+
 def normalize_image(img: sitk.Image, norm_type: str) -> sitk.Image:
     """
     Normalize a SimpleITK image via img_normalize, preserving its spacing/
@@ -175,9 +174,8 @@ def split_and_save(
         )
 
 
-# ---------------------------------------------------------------------------
-# Per-image pipeline (steps 1-5)
-# ---------------------------------------------------------------------------
+# Per-image pipeline 
+
 def process_image(
     tif_path: str,
     output_dir: str,
@@ -262,7 +260,7 @@ if __name__ == "__main__":
         "--axis",
         default=2,
         type=int,
-        help="In which axis the image should be split",
+        help="In which axis the image should be split: Default is 2 (Z-axis)",
     )
     args = parser.parse_args()
 
@@ -289,8 +287,8 @@ if __name__ == "__main__":
             "Warning: No model_path was given, default patch_size and target_spacing "
             "are taken, for exact values give the model path"
         )
-        patch_size = [224, 224, 48]
-        target_spacing = [1.0, 1.0, 1.0]
+        patch_size = [256, 256, 80]
+        target_spacing = [0.019, 0.019, 0.019]
 
     print(f"Model Parameters:")
     print(f"Patch Size:     {patch_size}")

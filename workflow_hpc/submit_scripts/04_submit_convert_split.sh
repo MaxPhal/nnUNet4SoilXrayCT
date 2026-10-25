@@ -15,10 +15,7 @@ module load foss/2022b Python/3.10.8
 ##  activating  the virtual environment
 source /home/phalempi/venv310/bin/activate # modify with your paths
 
-## declaring the environment variable
-export nnUNet_raw="/work/phalempi/nnUNet_raw"
-
-## set path to find dataset_info.json and __path__.py
+## set path to find scripts 
 cd /home/phalempi/nnUNet4SoilXrayCT/workflow_hpc/
 
 ## retrieve file paths from __path__.py (in pwd)
