@@ -12,9 +12,8 @@ from tqdm import tqdm
 from make_annotations import read_metadata
 from prepare_raw_data_for_training_ws import img_normalize
 
-# ---------------------------------------------------------------------------
-# Step 2/3: read a (multi-page / 3D) .tif directly in Python, no ImageJ needed
-# ---------------------------------------------------------------------------
+# Step: read a (multi-page / 3D) .tif directly in Python
+
 def _resolution_to_spacing(res_value) -> float:
     """
     Convert a TIFF XResolution/YResolution tag value (pixels-per-unit) to a
@@ -87,9 +86,8 @@ def read_tif_as_sitk(tif_path: str) -> sitk.Image:
     return img
 
 
-# ---------------------------------------------------------------------------
-# Steps 4/5: split (or copy) the opened image and save into its own folder
-# ---------------------------------------------------------------------------
+# Steps: split (or copy) the opened image and save into its own folder
+
 def normalize_image(img: sitk.Image, norm_type: str) -> sitk.Image:
     """
     Normalize a SimpleITK image via img_normalize, preserving its spacing/
@@ -179,10 +177,8 @@ def split_and_save(
             True,
         )
 
+# Per-image pipeline 
 
-# ---------------------------------------------------------------------------
-# Per-image pipeline (steps 1-4)
-# ---------------------------------------------------------------------------
 def process_image(
     tif_path: str,
     output_dir: str,
@@ -285,9 +281,10 @@ if __name__ == "__main__":
     else:
         print(
             "Warning: No model_path was given, default patch_size and target_spacing "
-            "are taken, for exact values give the model path"
+            "are taken; patch_size = [256, 256, 80], target_spacing = [0.019, 0.019, 0.019]. "
+            "For exact values, please give the path to the trained model"
         )
-        patch_size = [256, 256, 10]
+        patch_size = [256, 256, 80]
         target_spacing = [0.019, 0.019, 0.019]
 
     print(f"Model Parameters:")

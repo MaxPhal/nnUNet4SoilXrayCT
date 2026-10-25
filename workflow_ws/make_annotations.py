@@ -2,9 +2,12 @@ import numpy as np
 import tifffile as tiff
 from skimage.filters import threshold_otsu
 import napari
+from os.path import join
 import argparse
 import json
 from pathlib import Path
+
+from __path__ import input_dir_images
 
 def read_metadata(path):
     """Load the dataset metadata JSON file from the current working directory."""
@@ -13,8 +16,8 @@ def read_metadata(path):
     return metadata
 
 def load_image(input_path, sample_id):
-    image_path = input_path / f'{sample_id}.tif'
-    grayscale_data = tiff.imread(image_path)
+    image_path = join(input_path, sample_id)
+    grayscale_data = tiff.imread(image_path + '.tif')
     print(f"Loaded {sample_id}, shape: {grayscale_data.shape}")
     return grayscale_data
 
@@ -64,7 +67,6 @@ def save_annotations(output_path, sample_id, annotations):
 def main():
     # Parsing arguments from command line
     parser = argparse.ArgumentParser(description='This is script to prepare ground truth annotations using Napari.')
-    parser.add_argument('-i', type=Path, required=True, help='Path to the input directory')
     parser.add_argument('-o', type=Path, required=True, help='Path to save the output')
     parser.add_argument('-id', type=str, required=True, help='Sample ID')
     parser.add_argument('-write', type=str, default= 'yes', required=False, help='Whether to save annotations or not - Possible answers: yes, no - Watch out: yes overwrites previous annotations - Default is yes')
@@ -72,7 +74,7 @@ def main():
     args = parser.parse_args()
 
     # loading grayscale data
-    grayscale_data = load_image(args.i, args.id)
+    grayscale_data = load_image(input_dir_images, args.id)
 
     # loading annotations if they exist, otherwise applying Otsu threshold
     if (args.o / f'{args.id}.tif').exists():
